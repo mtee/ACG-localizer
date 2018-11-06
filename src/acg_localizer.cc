@@ -26,6 +26,7 @@
 #define __STDC_LIMIT_MACROS
 
 // C++ includes
+#include <cstdlib>
 #include <vector>
 #include <set>
 #include <map>
@@ -63,7 +64,22 @@
 // simple vector class for 3D points
 #include <OpenMesh/Core/Geometry/VectorT.hh>
 
+// 3D viewer
+#include "pointcloudmapping.h"
+
 const uint64_t sift_dim = 128;
+
+
+std::vector<std::string> split(const std::string& s, char delim) 
+{
+    std::vector<std::string> elems;
+    std::stringstream ss(s);
+    std::string item;
+    
+    while (std::getline(ss, item, delim)) elems.push_back(item);
+    
+    return elems;
+}
 
 ////
 // Classes to handle the two nearest neighbors (nn) of a descriptor.
@@ -395,6 +411,9 @@ int main (int argc, char **argv)
     return -1;
   }
 
+  // set default visualization scaling. Should be 10 for bundler files, 1 for rtabmap
+
+  float scale = 10;
 
   min_inlier = atof( argv[7] );
 
@@ -442,7 +461,8 @@ int main (int argc, char **argv)
   std::cout << "* Loading and parsing the assignments ... " << std::endl;
 
   // store the 3D positions of the 3D points
-  std::vector< OpenMesh::Vec3f > points3D;
+  std::vector< cv::Vec3f > points3D;
+  std::vector< cv::Vec3b > colors_3D;
 
   // store the descriptors in a vector simply by concatenating their entries
   // depending on the mode, either unsigned char entries or floating point entries are used
@@ -460,6 +480,9 @@ int main (int argc, char **argv)
   // number of non-empty visual words, the number of 3D points and the total number of descriptors
   uint32_t nb_non_empty_vw, nb_3D_points, nb_descriptors;
 
+
+  PointCloudMapping pcm(0.01);
+  
   for( uint32_t i=0; i<nb_clusters; ++i )
     vw_points_descriptors[i].clear();
 
@@ -486,6 +509,7 @@ int main (int argc, char **argv)
 
     // read the 3D points and their visibility polygons
     points3D.resize(nb_3D_points);
+    colors_3D.resize(nb_3D_points);
     if( mode == 0 || mode == 2 )
       all_descriptors.resize(128*nb_descriptors);
     else
@@ -494,13 +518,25 @@ int main (int argc, char **argv)
 
     // load the points
     float *point_data = new float[3];
+    unsigned char *color_data = new unsigned char[3];
+
     for( uint32_t i=0; i<nb_3D_points; ++i )
     {
       ifs.read(( char* ) point_data, 3 * sizeof( float ) );
       for( int j=0; j<3; ++j )
         points3D[i][j] = point_data[j];
+      
+
+      ifs.read(( char* ) color_data, 3 * sizeof( unsigned char ) );
+      for( int j=0; j<3; ++j )
+        colors_3D[i][j] = color_data[j];
     }
     delete [] point_data;
+    delete [] color_data;
+
+
+
+    pcm.AddPointCloud(points3D, colors_3D, scale);
 
     // load the descriptors
     int tmp_int;
@@ -542,21 +578,31 @@ int main (int argc, char **argv)
   std::vector< std::string > key_filenames;
   key_filenames.clear();
   {
-    std::ifstream ifs( keylist.c_str(), std::ios::in );
-    std::string tmp_string;
-
-    while( !ifs.eof() )
+    std::ifstream ifs( keylist.c_str());
+    std::string line;
+    std::vector<std::string> tokens;
+    size_t lastindex = 0;
+    while (std::getline(ifs, line))
     {
-      tmp_string = "";
-      ifs >> tmp_string;
-      if( !tmp_string.empty() )
-        key_filenames.push_back(tmp_string);
+      tokens = split(line, ' ');
+    //  std::cout << "line has # items: " <<tokens.size() << std::endl;
+      if (tokens.size() > 1) {
+        lastindex = tokens[0].find_last_of("."); 
+        std::string keyFile = tokens[0].substr(0, lastindex) + ".key"; 
+        key_filenames.push_back(keyFile);
+        }
     }
     ifs.close();
     std::cout << " done loading " << key_filenames.size() << " keyfile names " << std::endl;
   }
 
   uint32_t nb_keyfiles = key_filenames.size();
+  
+  ////
+  // Initialize 3D viewer
+  
+
+
 
   ////
   // do the actual localization
@@ -945,9 +991,24 @@ int main (int argc, char **argv)
     std::cout << " camera calibration: " << K << std::endl;
     std::cout << " camera rotation: " << Rot << std::endl;
     std::cout << " camera position: " << proj_matrix.m_center << std::endl;
+    cv::Mat transform = cv::Mat::eye(4, 4, CV_64F);
+
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        transform.at<double>(i, j) = Rot(i, j);
+      }
+    }
+    for (int i = 0; i < 3; i++)
+      transform.at<double>(i, 3) = proj_matrix.m_center[i] / scale;
+    
+    std::cout << "adding camera frustum" << std::endl;
+    transform = transform.inv();
+    pcm.AddOrUpdateFrustum("1", transform, 0.1, 0, 255, 255, 2);
 
     ofs_details << inlier.size() << " " << nb_corr << " " << vw_time << " " << corr_time << " " << RANSAC_time << " " << all_timer.GetElapsedTime() << std::endl;
 
+    std::cout << "Press Enter to Continue";
+    std::cin.ignore();
     std::cout << "#########################" << std::endl;
 
     // determine whether the image was registered or not

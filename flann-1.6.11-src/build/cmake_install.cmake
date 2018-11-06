@@ -1,4 +1,4 @@
-# Install script for directory: /home/pang/software/ACG-Localizer/flann-1.6.11-src
+# Install script for directory: /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,11 +34,11 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/cmake/cmake_install.cmake")
-  include("/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/src/cmake_install.cmake")
-  include("/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/examples/cmake_install.cmake")
-  include("/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/test/cmake_install.cmake")
-  include("/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/doc/cmake_install.cmake")
+  include("/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/cmake/cmake_install.cmake")
+  include("/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/src/cmake_install.cmake")
+  include("/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/examples/cmake_install.cmake")
+  include("/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/test/cmake_install.cmake")
+  include("/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/doc/cmake_install.cmake")
 
 endif()
 
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

@@ -1,4 +1,4 @@
-# Install script for directory: /home/pang/software/ACG-Localizer/flann-1.6.11-src/src
+# Install script for directory: /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,9 +34,8 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/src/cpp/cmake_install.cmake")
-  include("/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/src/matlab/cmake_install.cmake")
-  include("/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/src/python/cmake_install.cmake")
+  include("/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/src/cpp/cmake_install.cmake")
+  include("/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/src/python/cmake_install.cmake")
 
 endif()
 

@@ -1,4 +1,4 @@
-# Install script for directory: /home/pang/software/ACG-Localizer/flann-1.6.11-src/cmake
+# Install script for directory: /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/cmake
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -32,7 +32,7 @@ if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
   set(CMAKE_INSTALL_SO_NO_EXE "1")
 endif()
 
-if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "pkgconfig" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib64/pkgconfig" TYPE FILE FILES "/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/cmake/flann.pc")
+if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "pkgconfig")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib64/pkgconfig" TYPE FILE FILES "/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/cmake/flann.pc")
 endif()
 

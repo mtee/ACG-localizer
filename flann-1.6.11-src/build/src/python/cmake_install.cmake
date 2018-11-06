@@ -1,4 +1,4 @@
-# Install script for directory: /home/pang/software/ACG-Localizer/flann-1.6.11-src/src/python
+# Install script for directory: /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/src/python
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -32,17 +32,17 @@ if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
   set(CMAKE_INSTALL_SO_NO_EXE "1")
 endif()
 
-if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/flann/python" TYPE DIRECTORY FILES "/home/pang/software/ACG-Localizer/flann-1.6.11-src/src/python/pyflann")
+if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/flann/python" TYPE DIRECTORY FILES "/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/src/python/pyflann")
 endif()
 
-if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/flann/python" TYPE FILE FILES "/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/src/python/setup.py")
+if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/flann/python" TYPE FILE FILES "/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/src/python/setup.py")
 endif()
 
-if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
+if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   execute_process(
-        COMMAND /usr/bin/python /home/pang/software/ACG-Localizer/flann-1.6.11-src/build/src/python/setup.py install
-        WORKING_DIRECTORY "/home/pang/software/ACG-Localizer/flann-1.6.11-src/src/python")
+        COMMAND /usr/bin/python /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/src/python/setup.py install
+        WORKING_DIRECTORY "/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/src/python")
 endif()
 

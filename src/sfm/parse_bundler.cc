@@ -193,6 +193,7 @@ bool parse_bundler::parse_data( const char* bundle_out_filename_, const char* im
   
   std::vector< std::string > keyfilenames;
   keyfilenames.resize( mNbCameras );
+  std::cout << " resize done " << std::endl;
   {    
     std::ifstream instream2( image_list_filename, std::ios::in );
     
@@ -201,7 +202,7 @@ bool parse_bundler::parse_data( const char* bundle_out_filename_, const char* im
       std::cerr << " Could not open the file " << image_list_filename << std::endl;
       return false;
     }
-    
+     std::cout << " stream open, reading in cameras: " << mNbCameras << std::endl; 
     char buffer[8192];
     
     for( uint32_t i=0; i<mNbCameras; ++i )

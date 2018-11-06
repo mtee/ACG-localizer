@@ -1,9 +1,9 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/flann_cpp-gd.dir/flann/flann_cpp.cpp.o"
   "CMakeFiles/flann_cpp-gd.dir/flann/nn/index_testing.cpp.o"
   "CMakeFiles/flann_cpp-gd.dir/flann/util/logger.cpp.o"
-  "CMakeFiles/flann_cpp-gd.dir/flann/util/random.cpp.o"
   "CMakeFiles/flann_cpp-gd.dir/flann/util/saving.cpp.o"
+  "CMakeFiles/flann_cpp-gd.dir/flann/util/random.cpp.o"
+  "CMakeFiles/flann_cpp-gd.dir/flann/flann_cpp.cpp.o"
   "../../lib/libflann_cpp-gd.pdb"
   "../../lib/libflann_cpp-gd.so"
 )

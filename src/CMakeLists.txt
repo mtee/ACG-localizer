@@ -7,16 +7,33 @@ endif ()
 find_package (LAPACK)
 find_package (GMM)
 find_package (OpenMesh)
+find_package(PCL 1.8.1 REQUIRED)
+
+add_definitions(${PCL_DEFINITIONS})
 
 #find_package (FLANN)
-set(FLANN_INCLUDE_DIR /home/pang/software/ACG-Localizer/flann-1.6.11-src/src/cpp)
-set(FLANN_LIBRARY /home/pang/software/ACG-Localizer/flann-1.6.11-src/build/lib/libflann_cpp_s.a)
+set(FLANN_INCLUDE_DIR /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/src/cpp)
+set(FLANN_LIBRARY /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib/libflann_cpp_s.a)
 
-
+# OpenCV
+find_package(OpenCV REQUIRED)
+if(NOT OpenCV_FOUND)
+        # make FIND_PACKAGE friendly
+        if(NOT OpenCV_FIND_QUIETLY)
+                if(OpenCV_FIND_REQUIRED)
+                        message(FATAL_ERROR "OpenCV required but some headers or libs not found. ${ERR_MSG}")
+                else(OpenCV_FIND_REQUIRED)
+                        message(STATUS "WARNING: OpenCV was not found. ${ERR_MSG}")
+                endif(OpenCV_FIND_REQUIRED)
+        endif(NOT OpenCV_FIND_QUIETLY)
+else(NOT OpenCV_FOUND)
+        message(STATUS "OpenCV Include Directory: ${OpenCV_INCLUDE_DIRS}")
+        message(STATUS "OpenCV Link Libraries: ${OpenCV_LIBS}")
+endif(NOT OpenCV_FOUND)
 
 #ANN
-set(ANN_INCLUDE_DIR /home/pang/software/ACG-Localizer/ann_1.1.2/include)
-set(ANN_LIBRARY /home/pang/software/ACG-Localizer/ann_1.1.2/lib/libANN.a)
+set(ANN_INCLUDE_DIR /home/mikhail/workspace/ACG-localizer/ann_1.1.2/include)
+set(ANN_LIBRARY /home/mikhail/workspace/ACG-localizer/ann_1.1.2/lib/libANN.a)
 
 # source and header of the exif reader
 set (exif_SRC exif_reader/exif_reader.cc exif_reader/jhead-2.90/exif.cc exif_reader/jhead-2.90/gpsinfo.cc exif_reader/jhead-2.90/iptc.cc exif_reader/jhead-2.90/jhead.cc exif_reader/jhead-2.90/jpgfile.cc exif_reader/jhead-2.90/makernote.cc exif_reader/jhead-2.90/paths.cc )
@@ -45,6 +62,8 @@ include_directories (
   ${OPENMESH_INCLUDE_DIR}
   ${FLANN_INCLUDE_DIR}
   ${ANN_INCLUDE_DIR}
+  ${PCL_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 link_directories (
@@ -52,6 +71,8 @@ link_directories (
   ${OPENMESH_LIBRARY_DIR}
   ${ANN_LIBRARY_DIR}
   ${FLANN_LIBRARY_DIR}
+  ${PCL_LIBRARY_DIRS}
+  ${OpenCV_LIBS}
 )
 
 
@@ -59,7 +80,7 @@ link_directories (
 # set sources for the executables
 add_executable (Bundle2Info features/SIFT_loader.cc features/SIFT_keypoint.hh features/SIFT_loader.hh ${sfm_SRC} ${sfm_HDR} math/matrix3x3.cc math/matrix4x4.cc math/matrixbase.cc math/projmatrix.cc math/matrix3x3.hh math/matrix4x4.hh math/matrixbase.hh math/projmatrix.hh Bundle2Info )
 add_executable (compute_desc_assignments compute_desc_assignments.cc ${sfm_SRC} ${sfm_HDR} ${features_SRC} math/matrix3x3.cc math/matrix4x4.cc math/matrixbase.cc math/projmatrix.cc math/matrix3x3.hh math/matrix4x4.hh math/matrixbase.hh math/projmatrix.hh ${features_HDR} )
-add_executable (acg_localizer ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR}  ${solver_SRC} ${solver_HDR} RANSAC.hh RANSAC.cc acg_localizer.cc )
+add_executable (acg_localizer ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR}  ${solver_SRC} ${solver_HDR} RANSAC.hh RANSAC.cc acg_localizer.cc pointcloudmapping.cpp vtkImageMatSource.cpp )
 add_executable (acg_localizer_knn ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR} ${solver_SRC} ${solver_HDR} RANSAC.hh RANSAC.cc acg_localizer_knn.cc )
 add_executable (acg_localizer_active_search ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR}  ${solver_SRC} ${solver_HDR} ${sfm_SRC} ${sfm_HDR} RANSAC.hh RANSAC.cc acg_localizer_active_search.cc )
 
@@ -76,6 +97,8 @@ target_link_libraries (compute_desc_assignments
 )
 
 target_link_libraries (acg_localizer
+  ${OpenCV_LIBS}
+  ${PCL_LIBRARIES}
   ${OPENMESH_LIBRARY}
   ${LAPACK_LIBRARY}
   ${LAPACK_LIBRARIES}

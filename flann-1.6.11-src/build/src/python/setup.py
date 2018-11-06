@@ -7,7 +7,7 @@ import sys
 
 
 def find_path():
-    lib_paths = [ os.path.abspath('/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/lib'), abspath(join(dirname(dirname(sys.argv[0])), '../../../lib')) ]
+    lib_paths = [ os.path.abspath('/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib'), abspath(join(dirname(dirname(sys.argv[0])), '../../../lib')) ]
     possible_libs = ['libflann.so', 'flann.dll', 'libflann.dll', 'libflann.dylib']
 
     for path in lib_paths:

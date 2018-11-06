@@ -624,9 +624,17 @@ int main (int argc, char **argv)
 	  float x = feature_infos[i].point.x;
 	  float y = feature_infos[i].point.y;
 	  float z = feature_infos[i].point.z;
-	  ofs.write( (char*) &x, sizeof( float ) );
+    unsigned char r = feature_infos[i].point.r;
+    unsigned char g = feature_infos[i].point.g;
+    unsigned char b = feature_infos[i].point.b;
+	  
+    ofs.write( (char*) &x, sizeof( float ) );
 	  ofs.write( (char*) &y, sizeof( float ) );
 	  ofs.write( (char*) &z, sizeof( float ) );
+    
+    ofs.write( (char*) &r, sizeof( unsigned char ) );
+    ofs.write( (char*) &g, sizeof( unsigned char ) );
+    ofs.write( (char*) &b, sizeof( unsigned char ) );
 	}
 
 	// now the descriptors

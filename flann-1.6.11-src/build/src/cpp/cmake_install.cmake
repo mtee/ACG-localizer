@@ -1,4 +1,4 @@
-# Install script for directory: /home/pang/software/ACG-Localizer/flann-1.6.11-src/src/cpp
+# Install script for directory: /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/src/cpp
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -32,7 +32,7 @@ if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
   set(CMAKE_INSTALL_SO_NO_EXE "1")
 endif()
 
-if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
+if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   foreach(file
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib64/libflann_cpp.so.1.6.11"
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib64/libflann_cpp.so.1.6"
@@ -46,9 +46,9 @@ if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMP
     endif()
   endforeach()
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib64" TYPE SHARED_LIBRARY FILES
-    "/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/lib/libflann_cpp.so.1.6.11"
-    "/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/lib/libflann_cpp.so.1.6"
-    "/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/lib/libflann_cpp.so"
+    "/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib/libflann_cpp.so.1.6.11"
+    "/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib/libflann_cpp.so.1.6"
+    "/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib/libflann_cpp.so"
     )
   foreach(file
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib64/libflann_cpp.so.1.6.11"
@@ -64,18 +64,18 @@ if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMP
   endforeach()
 endif()
 
-if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib64" TYPE STATIC_LIBRARY FILES "/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/lib/libflann_cpp_s.a")
+if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib64" TYPE STATIC_LIBRARY FILES "/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib/libflann_cpp_s.a")
 endif()
 
-if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
+if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib64/libflann_cpp-gd.so" AND
      NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib64/libflann_cpp-gd.so")
     file(RPATH_CHECK
          FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib64/libflann_cpp-gd.so"
          RPATH "")
   endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib64" TYPE SHARED_LIBRARY FILES "/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/lib/libflann_cpp-gd.so")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib64" TYPE SHARED_LIBRARY FILES "/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib/libflann_cpp-gd.so")
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib64/libflann_cpp-gd.so" AND
      NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib64/libflann_cpp-gd.so")
     if(CMAKE_INSTALL_DO_STRIP)
@@ -84,11 +84,11 @@ if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMP
   endif()
 endif()
 
-if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib64" TYPE STATIC_LIBRARY FILES "/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/lib/libflann_cpp_s-gd.a")
+if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib64" TYPE STATIC_LIBRARY FILES "/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib/libflann_cpp_s-gd.a")
 endif()
 
-if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
+if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   foreach(file
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib64/libflann.so.1.6.11"
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib64/libflann.so.1.6"
@@ -102,9 +102,9 @@ if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMP
     endif()
   endforeach()
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib64" TYPE SHARED_LIBRARY FILES
-    "/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/lib/libflann.so.1.6.11"
-    "/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/lib/libflann.so.1.6"
-    "/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/lib/libflann.so"
+    "/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib/libflann.so.1.6.11"
+    "/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib/libflann.so.1.6"
+    "/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib/libflann.so"
     )
   foreach(file
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib64/libflann.so.1.6.11"
@@ -120,11 +120,11 @@ if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMP
   endforeach()
 endif()
 
-if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib64" TYPE STATIC_LIBRARY FILES "/home/pang/software/ACG-Localizer/flann-1.6.11-src/build/lib/libflann_s.a")
+if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib64" TYPE STATIC_LIBRARY FILES "/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib/libflann_s.a")
 endif()
 
-if("${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/pang/software/ACG-Localizer/flann-1.6.11-src/src/cpp/flann" FILES_MATCHING REGEX "/[^/]*\\.h$" REGEX "/[^/]*\\.hpp$")
+if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/src/cpp/flann" FILES_MATCHING REGEX "/[^/]*\\.h$" REGEX "/[^/]*\\.hpp$")
 endif()
 
