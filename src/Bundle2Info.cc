@@ -151,7 +151,13 @@ int main (int argc, char **argv)
     pos[1] = feature_infos[i].point.y;
     pos[2] = feature_infos[i].point.z;
     ofs.write( (char*) pos, 3*sizeof( float ) );
-	delete [] pos;
+    delete [] pos;
+
+    unsigned char *col = new unsigned char[3];
+    col[0] = feature_infos[i].point.r;
+    col[1] = feature_infos[i].point.g;
+    col[2] = feature_infos[i].point.b;
+    ofs.write( (char*) col, 3*sizeof( unsigned char ) );
 	
 	// the number of cameras that point is visible in
     uint32_t nb_cams_visible_in = (uint32_t) feature_infos[i].view_list.size();

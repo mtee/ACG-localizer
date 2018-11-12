@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 
 project (acg_localizer)
-
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 
 set (CMAKE_CXX_FLAGS "--std=gnu++11 ${CMAKE_CXX_FLAGS}")
 

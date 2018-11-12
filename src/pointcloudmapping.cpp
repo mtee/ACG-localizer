@@ -376,6 +376,7 @@ cv::Mat PointCloudMapping::AddTestFrameToPointCloud(cv::Mat &A, cv::Mat transfor
 void PointCloudMapping::AddPointCloud(std::vector<cv::Vec3f> points, std::vector<cv::Vec3b> colorList, float scale)
 {
     boost::unique_lock<mutex> updateLock(updateModelMutex);
+    std::cout << "adding point cloud with points: " << points.size() << std::endl;
     //    ms << "Adding test frame to the cloud\n";
 
     // remove padding
@@ -387,26 +388,28 @@ void PointCloudMapping::AddPointCloud(std::vector<cv::Vec3f> points, std::vector
     //       }
 
     PointCloud::Ptr tmp(new PointCloud());
-
+    float range = 1000;
     for (int i = 0; i < points.size(); i++)
     {
         PointT p;
-        p.x = (double)points[i][0] / scale; // 1000;
-        p.y = (double)points[i][1] / scale; // 1000;
-        p.z = (double)points[i][2] / scale; // 1000;
+        p.x = (double)points[i][0] / scale; 
+        p.y = (double)points[i][1] / scale; 
+        p.z = (double)points[i][2] / scale;
 
-        p.b = (unsigned char) colorList[i][0];
+        p.b = (unsigned char) colorList[i][2];
         p.g = (unsigned char) colorList[i][1];
-        p.r = (unsigned char) colorList[i][2];
+        p.r = (unsigned char) colorList[i][0];
+
         p.a = 255;
-        tmp->points.push_back(p);
+        if (p.x < range && p.y < range && p.x > -range && p.y > -range)
+            tmp->points.push_back(p);
     }
     tmp->is_dense = false;
 
     *globalMap += *tmp;
 
     updated = true;
-    filtered = false;
+    filtered = true;
 
     // cv::Mat cameraMatrix = AddOrUpdateFrustum(frustumId, tCloned, 0.5, 255, 0, 0);
     if (!this->visualizer->updatePointCloud(globalMap, "cloud"))
@@ -414,7 +417,7 @@ void PointCloudMapping::AddPointCloud(std::vector<cv::Vec3f> points, std::vector
         pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(globalMap);
         this->visualizer->addPointCloud(globalMap, rgb, "cloud");
     }
-
+std::cout << "added" << std::endl;
     keyFrameUpdated.notify_one();
 }
 
@@ -708,7 +711,10 @@ void PointCloudMapping::AddOrUpdateFrustum(
             // Transform
 
             Eigen::Transform<float, 3, Eigen::Affine> t;
-            cv::Mat transformResult = transform * opticalRotInv;
+            
+
+            cv::Mat transformResult = transform.inv() * opticalRotInv;
+            //cv::Mat transformResult = transform;
             for (int i = 0; i < 4; i++)
             {
                 t(i, 0) = (float)transformResult.at<double>(i, 0);
@@ -782,7 +788,8 @@ void PointCloudMapping::Visualize()
     this->visualizer->setBackgroundColor(0, 0, 0);
     this->visualizer->registerKeyboardCallback(&PointCloudMapping::keyboardEventOccurred, *this);
     this->visualizer->registerPointPickingCallback(&PointCloudMapping::pointPickingEventOccurred, *this);
-
+    this->visualizer->addCoordinateSystem(1.0);
+    this->visualizer->setCameraClipDistances(0.001, 1000);
     // x=red axis, y=green axis, z=blue axis z direction is point into the screen.
     //  this->visualizer->addCoordinateSystem(1.0);
     pcl::ModelCoefficients sphere_coeff;

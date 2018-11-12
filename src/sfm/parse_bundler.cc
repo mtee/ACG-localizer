@@ -161,8 +161,7 @@ bool parse_bundler::parse_data( const char* bundle_out_filename_, const char* im
     instream >> r >> g >> b;
     mFeatureInfos[i].point.r = (unsigned char) r;
     mFeatureInfos[i].point.g = (unsigned char) g;
-    mFeatureInfos[i].point.b = (unsigned char) b;
-    
+    mFeatureInfos[i].point.b = (unsigned char) b;    
     
     // now, read the view list
     uint32_t view_list_length;
@@ -379,6 +378,15 @@ bool parse_bundler::load_from_binary( const char* filename, const int format )
     mFeatureInfos[i].point.z = pos[2];
     delete [] pos;
     pos = 0;
+
+    unsigned char * col = new unsigned char[3];
+    ifs.read( (char* ) col, 3*sizeof( unsigned char ) );
+    mFeatureInfos[i].point.r = col[0];
+    mFeatureInfos[i].point.g = col[1];
+    mFeatureInfos[i].point.b = col[2];
+    delete [] col;
+    col = 0;
+
 
     uint32_t size_view_list=0;
     ifs.read(( char* ) &size_view_list, sizeof( uint32_t ) );

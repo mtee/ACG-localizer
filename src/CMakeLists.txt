@@ -127,17 +127,17 @@ target_link_libraries (acg_localizer_active_search
 
 # install the executables
 
-install( PROGRAMS ${CMAKE_BINARY_DIR}/src/Bundle2Info
-         DESTINATION ${CMAKE_BINARY_DIR}/bin)
+#install( PROGRAMS ${CMAKE_BINARY_DIR}/src/Bundle2Info
+#         DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
-install( PROGRAMS ${CMAKE_BINARY_DIR}/src/compute_desc_assignments
-         DESTINATION ${CMAKE_BINARY_DIR}/bin) 
+#install( PROGRAMS ${CMAKE_BINARY_DIR}/src/compute_desc_assignments
+#         DESTINATION ${CMAKE_BINARY_DIR}/bin) 
 
-install( PROGRAMS ${CMAKE_BINARY_DIR}/src/acg_localizer
-         DESTINATION ${CMAKE_BINARY_DIR}/bin) 
+#install( PROGRAMS ${CMAKE_BINARY_DIR}/src/acg_localizer
+#         DESTINATION ${CMAKE_BINARY_DIR}/bin) 
          
-install( PROGRAMS ${CMAKE_BINARY_DIR}/src/acg_localizer_knn
-         DESTINATION ${CMAKE_BINARY_DIR}/bin)
+#install( PROGRAMS ${CMAKE_BINARY_DIR}/src/acg_localizer_knn
+#         DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
-install( PROGRAMS ${CMAKE_BINARY_DIR}/src/acg_localizer_active_search
-         DESTINATION ${CMAKE_BINARY_DIR}/bin) 
+#install( PROGRAMS ${CMAKE_BINARY_DIR}/src/acg_localizer_active_search
+#        DESTINATION ${CMAKE_BINARY_DIR}/bin) 

@@ -628,6 +628,8 @@ int main (int argc, char **argv)
     unsigned char g = feature_infos[i].point.g;
     unsigned char b = feature_infos[i].point.b;
 	  
+
+
     ofs.write( (char*) &x, sizeof( float ) );
 	  ofs.write( (char*) &y, sizeof( float ) );
 	  ofs.write( (char*) &z, sizeof( float ) );

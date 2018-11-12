@@ -413,7 +413,7 @@ int main (int argc, char **argv)
 
   // set default visualization scaling. Should be 10 for bundler files, 1 for rtabmap
 
-  float scale = 10;
+  float scale = 1;
 
   min_inlier = atof( argv[7] );
 
@@ -481,7 +481,7 @@ int main (int argc, char **argv)
   uint32_t nb_non_empty_vw, nb_3D_points, nb_descriptors;
 
 
-  PointCloudMapping pcm(0.01);
+  PointCloudMapping pcm(100);
   
   for( uint32_t i=0; i<nb_clusters; ++i )
     vw_points_descriptors[i].clear();
@@ -535,7 +535,7 @@ int main (int argc, char **argv)
     delete [] color_data;
 
 
-
+    std::cout <<"addpointcloud" << std::endl;
     pcm.AddPointCloud(points3D, colors_3D, scale);
 
     // load the descriptors
@@ -576,7 +576,9 @@ int main (int argc, char **argv)
   ////
   // now load all the filenames of the query images
   std::vector< std::string > key_filenames;
+  std::vector< std::string > jpg_filenames;
   key_filenames.clear();
+  jpg_filenames.clear();
   {
     std::ifstream ifs( keylist.c_str());
     std::string line;
@@ -587,6 +589,7 @@ int main (int argc, char **argv)
       tokens = split(line, ' ');
     //  std::cout << "line has # items: " <<tokens.size() << std::endl;
       if (tokens.size() > 1) {
+        jpg_filenames.push_back(tokens[0]);
         lastindex = tokens[0].find_last_of("."); 
         std::string keyFile = tokens[0].substr(0, lastindex) + ".key"; 
         key_filenames.push_back(keyFile);
@@ -638,7 +641,7 @@ int main (int argc, char **argv)
 
   for( uint32_t i=0; i<nb_keyfiles; ++i, N+=1.0 )
   {
-    std::cout << std::endl << " --------- " << i+1 << " / " << nb_keyfiles << " --------- " << std::endl;
+    std::cout << std::endl << " --------- " << i+1 << " / " << nb_keyfiles << ":" << jpg_filenames[i] << std::endl;
 
     // load the features
     SIFT_loader key_loader;
@@ -1003,12 +1006,19 @@ int main (int argc, char **argv)
     
     std::cout << "adding camera frustum" << std::endl;
     transform = transform.inv();
-    pcm.AddOrUpdateFrustum("1", transform, 0.1, 0, 255, 255, 2);
+    pcm.AddOrUpdateFrustum("1", transform, 10, 0, 1, 1, 2);
 
+    cv::Mat img; 
+    img = cv::imread(jpg_filenames[i], cv::IMREAD_COLOR);
+    if (img.data) {
+      cv::imshow("rgb query", img);
+      cv::waitKey(0);
+      }
+      
     ofs_details << inlier.size() << " " << nb_corr << " " << vw_time << " " << corr_time << " " << RANSAC_time << " " << all_timer.GetElapsedTime() << std::endl;
 
-    std::cout << "Press Enter to Continue";
-    std::cin.ignore();
+   // std::cout << "Press Enter to Continue";
+   // std::cin.ignore();
     std::cout << "#########################" << std::endl;
 
     // determine whether the image was registered or not
