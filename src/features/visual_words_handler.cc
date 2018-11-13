@@ -612,7 +612,11 @@ bool visual_words_handler::assign_visual_words_uchar( std::vector< unsigned char
 
 
 //---------------------------------------------------
-    
+  /*
+  descriptors - feature vectors of length 128 extracted from the query image
+  nb_descriptors - number of feature vectors
+  assignments - output?
+  */
 bool visual_words_handler::assign_visual_words_ucharv( std::vector< unsigned char* > &descriptors, uint32_t nb_descriptors, std::vector< uint32_t > &assignments )
 {
   if( assignments.size() < (size_t) nb_descriptors )
