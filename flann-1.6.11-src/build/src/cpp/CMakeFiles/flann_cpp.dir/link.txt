@@ -1,1 +1,0 @@
-/usr/lib/ccache/c++  -fPIC -O2 -g -DNDEBUG  -shared -Wl,-soname,libflann_cpp.so.1.6 -o ../../lib/libflann_cpp.so.1.6.11  -Wl,-whole-archive ../../lib/libflann_cpp_s.a -Wl,-no-whole-archive 

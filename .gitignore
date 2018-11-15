@@ -1,3 +1,5 @@
 *.cluster
 build/
 .vscode/
+flann-1.6.11-src/
+bin/
