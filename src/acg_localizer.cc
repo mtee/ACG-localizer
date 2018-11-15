@@ -648,11 +648,11 @@ int main (int argc, char **argv)
     key_loader.load_features( key_filenames[i].c_str(), LOWE );
 
     std::vector< unsigned char* >& descriptors = key_loader.get_descriptors();
-    std::vector< SIFT_keypoint >& keypoints = key_loader.get_keypoints();
+    std::vector< SIFT_keypoint >& keypoints = key_loader.get_keypoints();  // keypoint: x, y, scale, orientation
 
     uint32_t nb_loaded_keypoints = (uint32_t) keypoints.size();
 
-
+    // Possible TODO: visualize keypoints in the image to see if they are mapped correctly
     // center the keypoints around the center of the image
     // first we need to get the dimensions of the image which we obtain from its exif tag
     int img_width, img_height;
@@ -669,7 +669,7 @@ int main (int argc, char **argv)
       keypoints[j].y = (img_height-1.0)/2.0f - keypoints[j].y;
     }
 
-    std::cout << " loaded " << nb_loaded_keypoints << " descriptors from " << key_filenames[i] << std::endl;
+    std::cout << "img size: " << img_width << "x" << img_height << ". Loaded " << nb_loaded_keypoints << " descriptors from " << key_filenames[i] << std::endl;
 
     ////
     // assign the descriptors to the visual words
