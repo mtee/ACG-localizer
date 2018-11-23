@@ -206,16 +206,23 @@ int main (int argc, char **argv)
 
     point_id_per_descriptor.resize(nb_descriptors,0);
 
-    // load the points
     float *point_data = new float[3];
+    unsigned char *color_data = new unsigned char[3];
+
     for( uint32_t i=0; i<nb_3D_points; ++i )
     {
       ifs.read(( char* ) point_data, 3 * sizeof( float ) );
       for( int j=0; j<3; ++j )
-		points3D[i][j] = point_data[j];
+        points3D[i][j] = point_data[j];
+      
+
+      ifs.read(( char* ) color_data, 3 * sizeof( unsigned char ) );
+      //for( int j=0; j<3; ++j )
+  //      colors_3D[i][j] = color_data[j];
     }
     delete [] point_data;
-
+    delete [] color_data;
+    
     // load the descriptors
     int tmp_int;
     for( uint32_t i=0; i<nb_descriptors; ++i )

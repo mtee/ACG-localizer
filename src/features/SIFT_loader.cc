@@ -67,7 +67,7 @@ bool SIFT_loader::save_features_lowe( const char *filename )
   
   // save the number of keypoints and the size of the descriptors
   outstream << mNbFeatures << " 128" << std::endl;
-  
+
   // load the keypoints and their descriptors
   for( uint32_t i=0; i<mNbFeatures; ++i )
   {
@@ -150,8 +150,9 @@ bool SIFT_loader::load_Lowe_features( const char *filename )
   for( uint32_t i=0; i<mNbFeatures; ++i )
   {
     mDescriptors[i] = new unsigned char[128];
-    instream >> y >> x >> scale >> orientation;
-    mKeypoints[i] = SIFT_keypoint( x, y, scale, orientation );
+      //mt: due to rtabmap exporting, we switch x and y here:
+    instream >> x >> y >> scale >> orientation;
+    mKeypoints[i] = SIFT_keypoint( y, x, scale, orientation );  // undone switching
     
     // read the descriptor
     for( int j=0; j<128; ++j )

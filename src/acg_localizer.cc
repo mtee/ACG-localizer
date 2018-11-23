@@ -81,6 +81,67 @@ std::vector<std::string> split(const std::string& s, char delim)
     return elems;
 }
 
+
+
+const double THRESHOLD = 300;
+
+/**
+ * Calculate euclid distance
+ */
+double euclidDistance(cv::Mat& vec1, cv::Mat& vec2) {
+  double sum = 0.0;
+  int dim = vec1.cols;
+  for (int i = 0; i < dim; i++) {
+    sum += (vec1.at<uchar>(0,i) - vec2.at<uchar>(0,i)) * (vec1.at<uchar>(0,i) - vec2.at<uchar>(0,i));
+  }
+  return std::sqrt(sum);
+}
+
+/**
+ * Find the index of nearest neighbor point from keypoints.
+ */
+int nearestNeighbor(cv::Mat& vec, std::vector<cv::KeyPoint>& keypoints, cv::Mat& descriptors) {
+  int neighbor = -1;
+  double minDist = 1e6;
+  
+  for (int i = 0; i < descriptors.rows; i++) {
+    cv::KeyPoint pt = keypoints[i];
+    cv::Mat v = descriptors.row(i);
+    double d = euclidDistance(vec, v);
+    //printf("%d %f\n", v.cols, d);
+    if (d < minDist) {
+      minDist = d;
+      neighbor = i;
+    }
+  }
+  
+  if (minDist < THRESHOLD) {
+    return neighbor;
+  }
+  
+  return -1;
+}
+
+/**
+ * Find pairs of points with the smallest distace between them
+ */
+void findPairs(std::vector<cv::KeyPoint>& keypoints1, cv::Mat& descriptors1,
+               std::vector<cv::KeyPoint>& keypoints2, cv::Mat& descriptors2,
+               std::vector<cv::Point2f>& srcPoints, std::vector<cv::Point2f>& dstPoints) {
+  for (int i = 0; i < descriptors1.rows; i++) {
+    cv::KeyPoint pt1 = keypoints1[i];
+    cv::Mat desc1 = descriptors1.row(i);
+    int nn = nearestNeighbor(desc1, keypoints2, descriptors2);
+    if (nn >= 0) {
+      cv::KeyPoint pt2 = keypoints2[nn];
+      srcPoints.push_back(pt1.pt);
+      dstPoints.push_back(pt2.pt);
+    }
+  }
+}
+
+
+
 ////
 // Classes to handle the two nearest neighbors (nn) of a descriptor.
 // There are three classes:
@@ -286,6 +347,44 @@ class nearest_neighbors_float
 // one function
 ////
 
+
+// First descriptor is stored in an array, while the second descriptor is stored in a vector (concatenation of vector entries)
+// The second descriptor begins at position index*128
+inline int compute_squared_SIFT_dist( cv::Mat v1, cv::Mat v2, uint32_t index )
+{
+  uint64_t index_( index );
+  index_ *= sift_dim;
+  int dist = 0;
+  int x = 0;
+  for( uint64_t i=0; i<sift_dim; ++i )
+  {
+    x = int( v1.at<float>(i) ) - int( v2.row(index).at<float>(i) );
+    dist += x*x;
+  }
+//  std::cout << "dist: " << dist << std::endl;
+  return dist;
+}
+
+
+
+// First descriptor is stored in an array, while the second descriptor is stored in a vector (concatenation of vector entries)
+// The second descriptor begins at position index*128
+inline int compute_squared_SIFT_dist( cv::Mat v1, std::vector< unsigned char > &v2, uint32_t index )
+{
+  uint64_t index_( index );
+  index_ *= sift_dim;
+  int dist = 0;
+  int x = 0;
+  for( uint64_t i=0; i<sift_dim; ++i )
+  {
+    x = int( v1.at<float>(i) ) - int( v2[index_+i] );
+    dist += x*x;
+  }
+//  std::cout << "dist: " << dist << std::endl;
+  return dist;
+}
+
+
 // First descriptor is stored in an array, while the second descriptor is stored in a vector (concatenation of vector entries)
 // The second descriptor begins at position index*128
 inline int compute_squared_SIFT_dist( const unsigned char * const v1, std::vector< unsigned char > &v2, uint32_t index )
@@ -299,6 +398,7 @@ inline int compute_squared_SIFT_dist( const unsigned char * const v1, std::vecto
     x = int( v1[i] ) - int( v2[index_+i] );
     dist += x*x;
   }
+ //   std::cout << "dist: " << dist << std::endl;
   return dist;
 }
 
@@ -317,6 +417,20 @@ inline float compute_squared_SIFT_dist_float( const unsigned char * const v1, st
   return dist;
 }
 
+// same in case that one descriptors consists of floating point values
+inline float compute_squared_SIFT_dist_float(cv::Mat v1, std::vector< float > &v2, uint32_t index )
+{
+  size_t index_( index );
+  index_ *= sift_dim;
+  float dist = 0;
+  float x = 0;
+  for( int i=0; i<sift_dim; ++i )
+  {
+    x = v1.at<float>(i) - v2[index_+i];
+    dist += x*x;
+  }
+  return dist;
+}
 
 // function to sort (2D feature, visual word) point pairs for the prioritized search.
 inline bool cmp_priorities( const std::pair< uint32_t, uint32_t >& a, const std::pair< uint32_t, uint32_t >& b )
@@ -396,6 +510,8 @@ int main (int argc, char **argv)
     std::cout << "____________________________________________________________________________________________________________________________" << std::endl;
     return -1;
   }
+
+    std::cout << "OpenCV version : " << CV_VERSION << std::endl;
 
   ////
   // get the parameters
@@ -535,10 +651,10 @@ int main (int argc, char **argv)
     delete [] color_data;
 
 
-    std::cout <<"addpointcloud" << std::endl;
     pcm.AddPointCloud(points3D, colors_3D, scale);
 
     // load the descriptors
+    std::cout << "loading all descriptors" << std::endl;
     int tmp_int;
     uint64_t index = 0;
     for( uint32_t i=0; i<nb_descriptors; ++i, index += sift_dim )
@@ -553,6 +669,7 @@ int main (int argc, char **argv)
     }
 
     // now we load the assignments of the pairs (point_id, descriptor_id) to the visual words
+    std::cout << "loading pair assignments" << std::endl;
     for( uint32_t i=0; i<nb_non_empty_vw; ++i )
     {
       uint32_t id, nb_pairs;
@@ -630,7 +747,7 @@ int main (int argc, char **argv)
   double RANSAC_time = 0.0;
   double avrg_RANSAC_time_registered = 0.0;
   double avrg_RANSAC_time_rejected = 0.0;
-
+    cv::RNG rng(12345);
   // the number of registered images
   uint32_t registered = 0;
 
@@ -639,34 +756,171 @@ int main (int argc, char **argv)
   std::vector< uint32_t > computed_visual_words( 50000, 0 );
 
 
+    cv::Mat camMatrix = cv::Mat::eye(3, 3, CV_64F);
+    cv::Mat distCoeffs = cv::Mat::zeros(1, 5, CV_64F);
+
+
+// tango at 960p
+        //  camMatrix.at<double>(0, 0) = 867.601196289;
+        //  camMatrix.at<double>(1, 1) = 867.601196289;
+        //  camMatrix.at<double>(0, 2) = 482.6857910;
+        //  camMatrix.at<double>(1, 2) = 268.82540;
+        //  camMatrix.at<double>(2, 2) = 1;
+
+
+
+
+// pupil at 720p
+        camMatrix.at<double>(0, 0) = 1200;
+        camMatrix.at<double>(1, 1) = 1200;
+        camMatrix.at<double>(0, 2) = 1280/2;
+        camMatrix.at<double>(1, 2) = 720/2;
+        camMatrix.at<double>(2, 2) = 1;
+        
+        distCoeffs.at<double>(0, 0) = -0.63037088;
+        distCoeffs.at<double>(0, 1) =  0.17767048;
+        distCoeffs.at<double>(0, 2) = -0.00489945;
+        distCoeffs.at<double>(0, 3) = -0.00192122;
+        distCoeffs.at<double>(0, 4) =  0.1757496;
+
+
   for( uint32_t i=0; i<nb_keyfiles; ++i, N+=1.0 )
   {
     std::cout << std::endl << " --------- " << i+1 << " / " << nb_keyfiles << ":" << jpg_filenames[i] << std::endl;
 
     // load the features
-    SIFT_loader key_loader;
-    key_loader.load_features( key_filenames[i].c_str(), LOWE );
+  //  SIFT_loader key_loader;
+   // key_loader.load_features( key_filenames[i].c_str(), LOWE );
 
-    std::vector< unsigned char* >& descriptors = key_loader.get_descriptors();
-    std::vector< SIFT_keypoint >& keypoints = key_loader.get_keypoints();  // keypoint: x, y, scale, orientation
+  //  std::vector< unsigned char* >& descriptors = key_loader.get_descriptors();
+  //  std::vector< SIFT_keypoint >& keypoints = key_loader.get_keypoints();  // keypoint: x, y, scale, orientation
 
-    uint32_t nb_loaded_keypoints = (uint32_t) keypoints.size();
 
-    // Possible TODO: visualize keypoints in the image to see if they are mapped correctly
+
     // center the keypoints around the center of the image
     // first we need to get the dimensions of the image which we obtain from its exif tag
-    int img_width, img_height;
+     int img_width, img_height;
     std::string jpg_filename( key_filenames[i] );
+
+
+
+
+
+    std::cout << "loading query image: " << jpg_filenames[i] << std::endl;
+    cv::Mat img_rgb_q_raw = cv::imread(jpg_filenames[i], CV_LOAD_IMAGE_ANYCOLOR);
+    cv::Mat img_q_rgb;
+    cv::undistort(img_rgb_q_raw, img_q_rgb, camMatrix, distCoeffs);
+
+    cv::Mat img_gray_q; 
+    cv::cvtColor(img_q_rgb, img_gray_q, cv::COLOR_BGR2GRAY);
+
+    cv::Ptr<cv::xfeatures2d::SiftFeatureDetector> detector = cv::xfeatures2d::SiftFeatureDetector::create();
+
+    cv::Mat img_rgb_db = cv::imread("/home/mikhail/Documents/RTAB-Map/office_november/images/1.jpg", CV_LOAD_IMAGE_ANYCOLOR);
+    cv::Mat img_gray_db; 
+    cv::cvtColor(img_rgb_db, img_gray_db, cv::COLOR_BGR2GRAY);
+    std::vector<cv::KeyPoint> kps_db;
+    cv::Mat mDescriptors_db;
+    detector->detectAndCompute(img_gray_db, cv::noArray(), kps_db, mDescriptors_db);
+
+
+
+     std::vector<cv::KeyPoint> kps_q;
+     cv::Mat mDescriptors_q;
+     std::cout << "running sift detector on image size: " << img_gray_q.size() << " dim: " << img_gray_q.dims << " channels: " << img_gray_q.channels() << std::endl;
+     detector->detectAndCompute(img_gray_q, cv::noArray(), kps_q, mDescriptors_q);
+     std::cout << "computed " << mDescriptors_q.rows << " descriptors. Type: " << mDescriptors_q.type() << std::endl;
+
+    int num_db_features = mDescriptors_db.rows;
+    int num_q_features = mDescriptors_q.rows;
+    std::cout << "num_db_features: " << num_db_features << " num_q_features: " << num_q_features << std::endl;
+    
+
+    cv::Size sz = cv::Size(img_gray_q.size().width + img_rgb_db.size().width, img_gray_q.size().height + img_rgb_db.size().height);
+    cv::Mat matchingImage = cv::Mat::zeros(sz, CV_8UC1);
+
+    cv::Mat roi1 = cv::Mat(matchingImage, cv::Rect(0, 0, img_gray_q.size().width, img_gray_q.size().height));
+    img_gray_q.copyTo(roi1);
+    cv::Mat roi2 = cv::Mat(matchingImage, cv::Rect(img_gray_q.size().width, img_gray_q.size().height, img_rgb_db.size().width, img_rgb_db.size().height));
+    img_gray_db.copyTo(roi2);
+
+    std::vector<cv::DMatch> matches;
+
+    for (int ik=0; ik< kps_q.size(); ik++){
+        cv::KeyPoint kp = kps_q[ik];
+        cv::circle(matchingImage, kp.pt, cvRound(kp.size*0.25), cv::Scalar(255,255,0), 1, 8, 0);
+    }
+    std::vector<cv::Point2f> srcPoints;
+    std::vector<cv::Point2f> dstPoints;
+    findPairs(kps_q, mDescriptors_q, kps_db, mDescriptors_db, srcPoints, dstPoints);
+    char text[256];
+    sprintf(text, "%zd/%zd keypoints matched.", srcPoints.size(), kps_q.size());
+    putText(matchingImage, text, cv::Point(0, cvRound(img_gray_q.size().height + 30)), cv::FONT_HERSHEY_SCRIPT_SIMPLEX, 1, cv::Scalar(0,0,255));
+    
+    // Draw line between nearest neighbor pairs
+    for (int i = 0; i < (int)srcPoints.size(); ++i) {
+      cv::Point2f pt1 = srcPoints[i];
+      cv::Point2f pt2 = dstPoints[i];
+      cv::Point2f from = pt1;
+      cv::Point2f to   = cv::Point(img_gray_q.size().width + pt2.x, img_gray_q.size().height + pt2.y);
+      line(matchingImage, from, to, cv::Scalar(0, 255, 255));
+    }
+    
+    // Display mathing image
+imshow("mywindow", matchingImage);
+
+
+
+   std::vector< SIFT_keypoint > keypoints;
+   keypoints.resize(kps_q.size());
+    for (int j = 0; j < mDescriptors_q.rows; j++) {
+        SIFT_keypoint kp(kps_q[j].pt.x, kps_q[j].pt.y, kps_q[j].size, kps_q[j].angle*CV_PI/180 );
+        keypoints[j] = kp;
+    }
+    
+    //std::cout << "keyp: " << keypoints[5].x << " " << keypoints[5].y << " " << keypoints[5].scale << " " << keypoints[5].orientation << std::endl;
+    //std::cout << "cvkp: " << kps[5].pt.x << " " << kps[5].pt.y << " " << kps[5].size << " " << kps[5].angle  << std::endl; 
+    for (int di = 0; di < 5; di++) {
+        std::cout << "desc: " << mDescriptors_q.row(5+di*2) << std::endl;
+    }
+    uint32_t nb_loaded_keypoints = (uint32_t) keypoints.size();
     jpg_filename.replace( jpg_filename.size()-3,3,"jpg");
     exif_reader::open_exif( jpg_filename.c_str() );
     img_width = exif_reader::get_image_width();
     img_height = exif_reader::get_image_height();
     exif_reader::close_exif();
 
+    float max = -1;
+    float min = 10000;
+
     for( uint32_t j=0; j<nb_loaded_keypoints; ++j )
     {
-      keypoints[j].x -= (img_width-1.0)/2.0f;
-      keypoints[j].y = (img_height-1.0)/2.0f - keypoints[j].y;
+        if (keypoints[j].x > max)
+            max = keypoints[j].x;
+        if (keypoints[j].x < min)
+            min = keypoints[j].x;
+    }
+    std::cout << "X max: " << max << "; X min: " << min << std::endl;
+
+    max = -1;
+    min = 10000;
+
+    for( uint32_t j=0; j<nb_loaded_keypoints; ++j )
+    {
+        if (keypoints[j].y > max)
+            max = keypoints[j].y;
+        if (keypoints[j].y < min)
+            min = keypoints[j].y;
+    }
+    std::cout << "Y max: " << max << "; Y min: " << min << std::endl;
+
+
+
+
+    for( uint32_t j=0; j<nb_loaded_keypoints; ++j )
+    {   // remapping image coordinates to the origin in the image center
+      keypoints[j].x = keypoints[j].x - (img_width-1.0)/2.0f;  
+      keypoints[j].y = (img_height-1.0)/2.0f - keypoints[j].y;  
     }
 
     std::cout << "img size: " << img_width << "x" << img_height << ". Loaded " << nb_loaded_keypoints << " descriptors from " << key_filenames[i] << std::endl;
@@ -677,6 +931,7 @@ int main (int argc, char **argv)
     timer.Init();
     timer.Start();
 
+    std::cout << "nb_loaded_keypoints " << nb_loaded_keypoints << std::endl;
     if( computed_visual_words.size() < nb_loaded_keypoints )
       computed_visual_words.resize( nb_loaded_keypoints );
 
@@ -685,8 +940,8 @@ int main (int argc, char **argv)
     unique_vw.clear();
 
     vw_handler.set_nb_paths( 10 );
-    vw_handler.assign_visual_words_ucharv( descriptors, nb_loaded_keypoints, computed_visual_words );
-
+    vw_handler.assign_visual_words_ucharv( mDescriptors_q, nb_loaded_keypoints, computed_visual_words );
+    //vw_handler.assign_visual_words_ucharv( descriptors, nb_loaded_keypoints, computed_visual_words );
     timer.Stop();
 
     for( size_t j=0; j<nb_loaded_keypoints; ++j )
@@ -758,7 +1013,9 @@ int main (int argc, char **argv)
             uint32_t point_id = vw_points_descriptors[assignment][k].first;
             uint32_t desc_id = vw_points_descriptors[assignment][k].second;
 
-            int dist = compute_squared_SIFT_dist( descriptors[j_index], all_descriptors, desc_id );
+
+            int dist = compute_squared_SIFT_dist( mDescriptors_q.row(j_index), all_descriptors, desc_id );
+            // int dist = compute_squared_SIFT_dist( descriptors[j_index], all_descriptors, desc_id );
 
             nn.update( point_id, dist );
           }
@@ -768,7 +1025,7 @@ int main (int argc, char **argv)
         if( nn.dist1 >= 0 )
         {
           if( nn.dist2 >= 0 )
-          {
+          {             
             if( nn.get_ratio() < nn_ratio )
             {
               // we found one, so we need check for mutual nearest neighbors
@@ -819,7 +1076,8 @@ int main (int argc, char **argv)
             uint32_t point_id = vw_points_descriptors[assignment][k].first;
             uint32_t desc_id = vw_points_descriptors[assignment][k].second;
 
-            float dist = compute_squared_SIFT_dist_float( descriptors[j_index], all_descriptors_float, desc_id );
+            //float dist = compute_squared_SIFT_dist_float( descriptors[j_index], all_descriptors_float, desc_id );
+            float dist = compute_squared_SIFT_dist_float( mDescriptors_q.row(j_index), all_descriptors_float, desc_id );
 
             nn.update( point_id, dist );
           }
@@ -879,7 +1137,8 @@ int main (int argc, char **argv)
             uint32_t desc_id = vw_points_descriptors[assignment][k].second;
 
 
-            int dist = compute_squared_SIFT_dist( descriptors[j_index], all_descriptors, desc_id );
+            int dist = compute_squared_SIFT_dist( mDescriptors_q.row(j_index), all_descriptors, desc_id );
+            //int dist = compute_squared_SIFT_dist( descriptors[j_index], all_descriptors, desc_id );
 
             nn.update( point_id, dist );
           }
@@ -955,20 +1214,77 @@ int main (int argc, char **argv)
     corr_time = timer.GetElapsedTime();
 
 
+    // visualize the correspondences: 3d points in the point cloud viewer and the 2d features in the image
+    pcm.Add2D3DCorrespondencesToPointCloud(c3D);
+    
     ////
     // do the pose verification using RANSAC
 
     uint32_t nb_corr = c2D.size() / 2;
     RANSAC::computation_type = P6pt;
-    RANSAC::stop_after_n_secs = true;
+    RANSAC::stop_after_n_secs = false;
     RANSAC::max_time = ransac_max_time;
     RANSAC::error = 10.0f; // for P6pt this is the SQUARED reprojection error in pixels
     RANSAC ransac_solver;
 
 
     std::cout << " applying RANSAC on " << nb_corr << " correspondences " << std::endl;
-    timer.Init();
-    timer.Start();
+    if (nb_corr > 5) {
+        timer.Init();
+        timer.Start();
+
+
+        cv::Mat rvec = cv::Mat::zeros(1, 3, CV_64F);
+        cv::Mat tvec = cv::Mat::zeros(1, 3, CV_64F);
+
+        cv::Mat inliers;
+        
+        std::cout << " c3D.size() = " << c3D.size() << std::endl;
+        std::vector<cv::Point3d> corr3d(nb_corr);
+        
+        corr3d.clear();
+        for (int i = 0; i < c3D.size(); i += 3) 
+            corr3d.push_back(cv::Point3d(c3D[i], c3D[i+1], c3D[i+2]));
+
+      //  std::cout << "c3d[0]   : "  << c3D[0] << " " << c3D[1] << " " << c3D[2] << std::endl;
+    //    std::cout << "corr3d[0]: " << corr3d[0] << std::endl;
+
+        // std::cout << "c3d[1]   : "  << c3D[3] << " " << c3D[4] << " " << c3D[5] << std::endl;
+        // std::cout << "corr3d[1]: " << corr3d[1] << std::endl;
+
+        std::vector<cv::Point2d> corr2d(nb_corr);
+        corr2d.clear();
+        for (int i = 0; i < c2D.size(); i += 2) 
+            corr2d.push_back(cv::Point2d(c2D[i] + (img_width-1.0)/2.0f, -c2D[i+1] + (img_height-1.0)/2.0f));
+//origin is left top: c2D[i] + (img_width-1.0)/2.0f, -c2D[i+1] + (img_height-1.0)/2.0f
+// origin is screen midddle: corr2d.push_back(cv::Point2d(c2D[i], c2D[i+1]));
+        // std::cout << "c2d[0]   : "  << c2D[0] << " " << c2D[1] << std::endl;
+        // std::cout << "corr2d[0]: " << corr2d[0] << std::endl;
+
+        // std::cout << "c2d[1]   : "  << c2D[2] << " " << c2D[3] << std::endl;
+        // std::cout << "corr2d[1]: " << corr2d[1] << std::endl;
+
+
+
+        std::cout << "starting opencv ransac with " << corr3d.size() 
+                << " 3d points and " << corr2d.size() << " 2d features" << std::endl 
+                << "with the camera matrix: " << std::endl << camMatrix << std::endl;
+        cv::solvePnPRansac(corr3d, corr2d, camMatrix, distCoeffs, rvec, tvec, false, 1000, 10.0F, 0.99, inliers);
+        std::cout << "opencv ransac pnp. Translation " << std::endl << tvec << std::endl << "inlier count: " << inliers.size() << std::endl;
+
+        cv::Mat sceneTransform = cv::Mat::eye(4, 4, CV_64F);
+        cv::Rodrigues(rvec, sceneTransform.rowRange(0, 3).colRange(0, 3));
+        std::cout << "rodrigues" << std::endl;
+        sceneTransform.at<double>(0, 3) = tvec.at<double>(0, 0);
+        sceneTransform.at<double>(1, 3) = tvec.at<double>(0, 1);
+        sceneTransform.at<double>(2, 3) = tvec.at<double>(0, 2);
+        
+        sceneTransform.at<double>(3, 3) = 1;
+      //  sceneTransform = sceneTransform.inv();
+        std::cout << "adding camera pose to scene: " << std::endl <<  sceneTransform << std::endl;
+        pcm.AddOrUpdateFrustum("2", sceneTransform, 1, 1, 0, 0, 2);
+        
+    }
     ransac_solver.apply_RANSAC( c2D, c3D, nb_corr, std::max( float( minimal_RANSAC_solution ) / float( nb_corr ), min_inlier ) );
     timer.Stop();
     RANSAC_time = timer.GetElapsedTime();
@@ -996,24 +1312,40 @@ int main (int argc, char **argv)
     std::cout << " camera position: " << proj_matrix.m_center << std::endl;
     cv::Mat transform = cv::Mat::eye(4, 4, CV_64F);
 
+
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
         transform.at<double>(i, j) = Rot(i, j);
       }
     }
+
+// TODO: find out, why fx is sometimes negative in the calibration matrix
+// for now, as a workaround, just invert the 2nd and 3rd row of the rotation matrix:
+ //   if (K(0, 0) < 0) {
+ //      for (int j = 0; j < 3; j++) {
+   //     transform.at<double>(1, j) = -transform.at<double>(1, j);
+   //     transform.at<double>(2, j) = -transform.at<double>(2, j);
+   //   } 
+ //   }
+
     for (int i = 0; i < 3; i++)
       transform.at<double>(i, 3) = proj_matrix.m_center[i] / scale;
     
     std::cout << "adding camera frustum" << std::endl;
     transform = transform.inv();
-    pcm.AddOrUpdateFrustum("1", transform, 10, 0, 1, 1, 2);
+//    pcm.AddOrUpdateFrustum("1", transform, 1, 0, 1, 1, 2);
 
-    cv::Mat img; 
-    img = cv::imread(jpg_filenames[i], cv::IMREAD_COLOR);
-    if (img.data) {
-      cv::imshow("rgb query", img);
-      cv::waitKey(0);
-      }
+    //cv::Mat img; 
+   // img = cv::imread(jpg_filenames[i], cv::IMREAD_COLOR);
+    
+    if (img_gray_q.data) {
+        for (int i = 0; i < c2D.size(); i+=2) {
+            cv::Scalar color = cv::Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
+            cv::circle(img_gray_q, cv::Point(c2D[i] + (img_width-1.0)/2.0f, -c2D[i+1] + (img_height-1.0)/2.0f), 4.0, color);
+        }
+        cv::imshow("bw query", img_gray_q);
+        cv::waitKey(0);
+    }
       
     ofs_details << inlier.size() << " " << nb_corr << " " << vw_time << " " << corr_time << " " << RANSAC_time << " " << all_timer.GetElapsedTime() << std::endl;
 
@@ -1046,14 +1378,15 @@ int main (int argc, char **argv)
     }
 
     // clean up
-    for( uint32_t j=0; j<nb_loaded_keypoints; ++j )
-    {
-      if( descriptors[j] != 0 )
-        delete [] descriptors[j];
-      descriptors[j] = 0;
-    }
+    // for( uint32_t j=0; j<nb_loaded_keypoints; ++j )
+    // {
+    //   if( descriptors[j] != 0 )
+    //     delete [] descriptors[j];
+    //   descriptors[j] = 0;
+    // }
 
-    descriptors.clear();
+    // descriptors.clear();
+    mDescriptors_q = cv::Mat::zeros(mDescriptors_q.size(), mDescriptors_q.type());
     keypoints.clear();
     inlier.clear();
 

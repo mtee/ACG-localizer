@@ -44,6 +44,7 @@
 #include <stdint.h>
 #include <cmath>
 #include <time.h>
+#include <opencv2/core.hpp>
 
 #include <flann/flann.hpp>
 
@@ -124,7 +125,9 @@ class visual_words_handler
     //! assign visual words using the method defined by set_method and stores them in assignments. Returns false if assignments could not be computed
     bool assign_visual_words_uchar( std::vector< unsigned char > &descriptors, uint32_t nb_descriptors, std::vector< uint32_t > &assignments );
     bool assign_visual_words_ucharv( std::vector< unsigned char* > &descriptors, uint32_t nb_descriptors, std::vector< uint32_t > &assignments );
+    bool assign_visual_words_ucharv( cv::Mat descriptors, uint32_t nb_descriptors, std::vector< uint32_t > &assignments );
     bool assign_visual_words_float( std::vector< float > &descriptors, uint32_t nb_descriptors, std::vector< uint32_t > &assignments );
+    bool assign_visual_words_float( cv::Mat descriptors, uint32_t nb_descriptors, std::vector< uint32_t > &assignments );
     
     /** 
      * assign visual words using the method defined by set_method and stores them in assignments. Returns false if assignments could not be computed.

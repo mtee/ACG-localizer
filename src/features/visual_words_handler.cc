@@ -611,6 +611,97 @@ bool visual_words_handler::assign_visual_words_uchar( std::vector< unsigned char
 
 
 
+
+//---------------------------------------------------
+  /*
+  descriptors - feature vectors of length 128 extracted from the query image
+  nb_descriptors - number of feature vectors
+  assignments - output?
+  */
+bool visual_words_handler::assign_visual_words_ucharv( cv::Mat descriptors, uint32_t nb_descriptors, std::vector< uint32_t > &assignments )
+{
+  if( assignments.size() < (size_t) nb_descriptors )
+    assignments.resize(nb_descriptors);
+  
+  if( mMethod == 0 )
+  {
+    // do a linear search
+    float vec[128];
+    for( uint32_t i=0; i<nb_descriptors; ++i )
+    {
+      // copy the descriptor
+      for( uint32_t j=0; j<128; ++j )
+	vec[j] = (float) descriptors.at<float>(i, j);
+      
+      // find the nearest neighbor
+      float max_dist = 1e20f;
+      float dist = 0.0f;
+      float x;
+      uint32_t index2 = 0;
+      for( uint32_t j=0; j<mNbVisualWords; ++j )
+      {
+	dist = 0.0f;
+// 	index2 = j*128;
+	for( uint32_t k=0; k<128; ++k )
+	{
+	  x = vec[k] - mClusterCentersFlann.data[index2+k];
+	  dist += x*x;
+	}
+	
+	if( dist < max_dist )
+	{
+	  max_dist = dist;
+	  assignments[i] = j;
+	}
+	index2 += 128;
+      }
+//       std::cout << " Linear: " << i << " -> " << assignments[i] << " dist :  " << max_dist << std::endl;
+    }
+    
+    return true;
+  }
+  else if( mMethod == 2 )
+  {
+    // FLANN
+    if( mFlannIndex == 0 )
+      return false;
+    
+    // copy the descriptors
+    resize( nb_descriptors );
+    for( uint32_t i=0; i<nb_descriptors; ++i )
+    {
+      for( uint32_t j=0; j<128; ++j )
+      {
+		mFlannFeatures[i][j] = (float) descriptors.at<float>(i, j);
+      }
+    }
+    
+    // compute the assignments
+    if( mFlannIndexType == 0 )
+    {
+      flann::SearchParams params( FLANN_CHECKS_AUTOTUNED );
+      mFlannIndex->knnSearch( mFlannFeatures, mFlannAssignments, mFlannDistances, 1, params );
+    }
+    else
+    {
+      flann::SearchParams params( mNbPath );
+      mFlannIndex->knnSearch( mFlannFeatures, mFlannAssignments, mFlannDistances, 1, params );
+    }
+    
+    // copy the assignments
+    for( uint32_t i=0; i<nb_descriptors; ++i )
+    {
+      assignments[i] = (uint32_t) mFlannAssignments.data[i];
+    }
+    
+    return true;
+  }
+  
+  return false;
+}
+
+
+
 //---------------------------------------------------
   /*
   descriptors - feature vectors of length 128 extracted from the query image
@@ -787,6 +878,96 @@ bool visual_words_handler::assign_visual_words_float( std::vector< float > &desc
   
   return false;
 }
+
+
+bool visual_words_handler::assign_visual_words_float( cv::Mat descriptors, uint32_t nb_descriptors, std::vector< uint32_t > &assignments )
+{
+    // THIS IS PROBABLY WRONG, USE UCHAR VERSION INSTEAD
+  if( assignments.size() < (size_t) nb_descriptors )
+    assignments.resize(nb_descriptors);
+  
+  if( mMethod == 0 )
+  {
+    // do a linear search
+    float vec[128];
+    uint32_t index = 0;
+    for( uint32_t i=0; i<nb_descriptors; ++i )
+    {
+      // copy the descriptor
+//       uint32_t index = i*128;
+      for( uint32_t j=0; j<128; ++j )
+	vec[j] = descriptors.at<float>(index/128, j);
+      
+      // find the nearest neighbor
+      float max_dist = 1e20f;
+      float dist = 0.0f;
+      float x;
+      uint32_t index2 = 0;
+      for( uint32_t j=0; j<mNbVisualWords; ++j )
+      {
+	dist = 0.0f;
+// 	index2 = j*128;
+	for( uint32_t k=0; k<128; ++k )
+	{
+	  x = vec[k] - mClusterCentersFlann.data[index2+k];
+	  dist += x*x;
+	}
+	
+	if( dist < max_dist )
+	{
+	  max_dist = dist;
+	  assignments[i] = j;
+	}
+	index2 += 128;
+      }
+      
+      index += 128;
+    }
+    
+    return true;
+  }
+  else if( mMethod == 2 )
+  {
+    // FLANN
+    
+    if( mFlannIndex == 0 )
+      return false;
+    
+    // copy the descriptors
+    resize( nb_descriptors );
+    uint32_t index = 0;
+    for( uint32_t i=0; i<nb_descriptors; ++i )
+    {
+      for( uint32_t j=0; j<128; ++j )
+      {
+		mFlannFeatures[i][j] = descriptors.at<float>(index/128, j);
+      }
+      index += 128;
+    }
+    
+    // compute the assignments
+    if( mFlannIndexType == 0 )
+    {
+      flann::SearchParams params( FLANN_CHECKS_AUTOTUNED );
+      mFlannIndex->knnSearch( mFlannFeatures, mFlannAssignments, mFlannDistances, 1, params );
+    }
+    else
+    {
+      flann::SearchParams params( mNbPath );
+      mFlannIndex->knnSearch( mFlannFeatures, mFlannAssignments, mFlannDistances, 1, params );
+    }
+    
+    // copy the assignments
+    for( uint32_t i=0; i<nb_descriptors; ++i )
+      assignments[i] = (uint32_t) mFlannAssignments.data[i];
+    
+    return true;
+  }
+  
+  
+  return false;
+}
+
 
 //---------------------------------------------------
     

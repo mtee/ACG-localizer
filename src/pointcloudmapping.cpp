@@ -373,6 +373,25 @@ cv::Mat PointCloudMapping::AddTestFrameToPointCloud(cv::Mat &A, cv::Mat transfor
     return transform;
 }
 
+
+void PointCloudMapping::Add2D3DCorrespondencesToPointCloud(std::vector< float > c3D) {
+    PointCloud::Ptr tmp(new PointCloud());
+    cv::RNG rng(12345);
+    for (int i = 0; i < c3D.size(); i+=3) {
+        PointT p;
+        p.x = c3D[i];
+        p.y = c3D[i+1];
+        p.z = c3D[i+2];
+        p.r = rng.uniform(0, 255);
+        p.g = rng.uniform(0, 255);
+        p.b = rng.uniform(0, 255);
+        p.a = 255;
+        tmp->points.push_back(p);
+    }
+    *displayCloud = *tmp;
+}
+
+
 void PointCloudMapping::AddPointCloud(std::vector<cv::Vec3f> points, std::vector<cv::Vec3b> colorList, float scale)
 {
     boost::unique_lock<mutex> updateLock(updateModelMutex);
@@ -714,7 +733,9 @@ void PointCloudMapping::AddOrUpdateFrustum(
             
 
             cv::Mat transformResult = transform.inv() * opticalRotInv;
-            //cv::Mat transformResult = transform;
+           // cv::Mat transformResult = transform * opticalRotInv;
+           //cv::Mat transformResult = transform;
+           // cv::Mat transformResult = transform.inv();
             for (int i = 0; i < 4; i++)
             {
                 t(i, 0) = (float)transformResult.at<double>(i, 0);
@@ -841,7 +862,7 @@ void PointCloudMapping::Visualize()
                     visualizer->addPointCloud(displayCloud, rgbDisplay, "curFrame");
 
                     visualizer->setPointCloudRenderingProperties(
-                        pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 12.0,
+                        pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5.0,
                         "curFrame");
                 }
             }

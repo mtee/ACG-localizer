@@ -22,9 +22,14 @@
 
 #include <vector>
 
-#include <opencv2/highgui/highgui.hpp>
+#include <opencv/cv.h>
 #include <opencv2/core.hpp>
-
+#include <opencv2/core/core.hpp>
+#include "opencv2/opencv.hpp"
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/calib3d.hpp>
+#include <opencv2/xfeatures2d.hpp>
 
 #include <pcl/common/transforms.h>
 #include <pcl/common/common.h>
@@ -72,6 +77,7 @@ public:
     void AddTrainingFrameToPointCloud(cv::Mat& camMatrix, cv::Mat transform, cv::Mat color, cv::Mat depth, std::string frustumId);
     void AddMeshToPointCloud(cv::Mat& camMatrix, cv::Mat transform, cv::Mat color, cv::Mat depth, std::string frustumId);
     cv::Mat AddTestFrameToPointCloud(cv::Mat& camMatrix, cv::Mat transform, cv::Mat color, cv::Mat depth, img_coord_t& cloud, cv::Mat_<cv::Point2i>& sampling, std::string frustumId);
+    void Add2D3DCorrespondencesToPointCloud(std::vector< float > c3D);
     PointCloud::Ptr extractIndices(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr & cloud, const pcl::IndicesPtr & indices, bool negative, bool keepOrganized);
     void mouseMoveEvent(const pcl::visualization::MouseEvent &event, void* junk);
     void Shutdown();
@@ -129,9 +135,23 @@ private:
 
     double mResolution = 0.1;
     pcl::VoxelGrid<PointT>  voxel;
+    
+    // corresponds to euler [ x: 1.5707963, y: 0, z: 1.5707963 ]: 
+    // 0, -1, 0, 0 
+    // 0, 0, -1, 0, 
+    // 1, 0, 0, 0, 
+    // 0, 0, 0, 1
 
     cv::Mat opticalRotInv = (cv::Mat_<double>(4,4) <<
             0, -1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 0, 1);
+
+    // corresponding to [ x: 1.5707963, y: 1.5707963, z: 0 ]:
+    // 0, 0, 1, 0 
+    // 1, 0, 0, 0 
+    // 0, 1, 0, 0 
+    // 0, 0, 0, 1
+    cv::Mat opticalRotInv2 = (cv::Mat_<double>(4,4) <<
+            0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1);
 
 
     struct callback_args{
