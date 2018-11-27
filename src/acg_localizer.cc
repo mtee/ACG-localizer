@@ -771,18 +771,25 @@ int main (int argc, char **argv)
 
 
 // pupil at 720p
-        camMatrix.at<double>(0, 0) = 1200;
-        camMatrix.at<double>(1, 1) = 1200;
-        camMatrix.at<double>(0, 2) = 1280/2;
-        camMatrix.at<double>(1, 2) = 720/2;
-        camMatrix.at<double>(2, 2) = 1;
+        // camMatrix.at<double>(0, 0) = 1200;
+        // camMatrix.at<double>(1, 1) = 1200;
+        // camMatrix.at<double>(0, 2) = 1280/2;
+        // camMatrix.at<double>(1, 2) = 720/2;
+        // camMatrix.at<double>(2, 2) = 1;
         
-        distCoeffs.at<double>(0, 0) = -0.63037088;
-        distCoeffs.at<double>(0, 1) =  0.17767048;
-        distCoeffs.at<double>(0, 2) = -0.00489945;
-        distCoeffs.at<double>(0, 3) = -0.00192122;
-        distCoeffs.at<double>(0, 4) =  0.1757496;
+        // distCoeffs.at<double>(0, 0) = -0.63037088;
+        // distCoeffs.at<double>(0, 1) =  0.17767048;
+        // distCoeffs.at<double>(0, 2) = -0.00489945;
+        // distCoeffs.at<double>(0, 3) = -0.00192122;
+        // distCoeffs.at<double>(0, 4) =  0.1757496;
 
+// galaxy s8 at 720p
+    camMatrix.at<double>(0, 0) = 1200;
+    camMatrix.at<double>(1, 1) = 1200;
+    camMatrix.at<double>(0, 2) = 1480/2;
+    camMatrix.at<double>(1, 2) = 720/2;
+    camMatrix.at<double>(2, 2) = 1;
+        
 
   for( uint32_t i=0; i<nb_keyfiles; ++i, N+=1.0 )
   {
@@ -816,58 +823,56 @@ int main (int argc, char **argv)
 
     cv::Ptr<cv::xfeatures2d::SiftFeatureDetector> detector = cv::xfeatures2d::SiftFeatureDetector::create();
 
-    cv::Mat img_rgb_db = cv::imread("/home/mikhail/Documents/RTAB-Map/office_november/images/1.jpg", CV_LOAD_IMAGE_ANYCOLOR);
-    cv::Mat img_gray_db; 
-    cv::cvtColor(img_rgb_db, img_gray_db, cv::COLOR_BGR2GRAY);
-    std::vector<cv::KeyPoint> kps_db;
-    cv::Mat mDescriptors_db;
-    detector->detectAndCompute(img_gray_db, cv::noArray(), kps_db, mDescriptors_db);
-
-
-
      std::vector<cv::KeyPoint> kps_q;
      cv::Mat mDescriptors_q;
      std::cout << "running sift detector on image size: " << img_gray_q.size() << " dim: " << img_gray_q.dims << " channels: " << img_gray_q.channels() << std::endl;
      detector->detectAndCompute(img_gray_q, cv::noArray(), kps_q, mDescriptors_q);
      std::cout << "computed " << mDescriptors_q.rows << " descriptors. Type: " << mDescriptors_q.type() << std::endl;
 
-    int num_db_features = mDescriptors_db.rows;
-    int num_q_features = mDescriptors_q.rows;
-    std::cout << "num_db_features: " << num_db_features << " num_q_features: " << num_q_features << std::endl;
+
+//     cv::Mat img_rgb_db = cv::imread("/home/mikhail/Documents/RTAB-Map/office_november/images/1.jpg", CV_LOAD_IMAGE_ANYCOLOR);
+//     cv::Mat img_gray_db; 
+//     cv::cvtColor(img_rgb_db, img_gray_db, cv::COLOR_BGR2GRAY);
+//     std::vector<cv::KeyPoint> kps_db;
+//     cv::Mat mDescriptors_db;
+//     detector->detectAndCompute(img_gray_db, cv::noArray(), kps_db, mDescriptors_db);
+//     int num_db_features = mDescriptors_db.rows;
+//     int num_q_features = mDescriptors_q.rows;
+//     std::cout << "num_db_features: " << num_db_features << " num_q_features: " << num_q_features << std::endl;
     
 
-    cv::Size sz = cv::Size(img_gray_q.size().width + img_rgb_db.size().width, img_gray_q.size().height + img_rgb_db.size().height);
-    cv::Mat matchingImage = cv::Mat::zeros(sz, CV_8UC1);
+//     cv::Size sz = cv::Size(img_gray_q.size().width + img_rgb_db.size().width, img_gray_q.size().height + img_rgb_db.size().height);
+//     cv::Mat matchingImage = cv::Mat::zeros(sz, CV_8UC1);
 
-    cv::Mat roi1 = cv::Mat(matchingImage, cv::Rect(0, 0, img_gray_q.size().width, img_gray_q.size().height));
-    img_gray_q.copyTo(roi1);
-    cv::Mat roi2 = cv::Mat(matchingImage, cv::Rect(img_gray_q.size().width, img_gray_q.size().height, img_rgb_db.size().width, img_rgb_db.size().height));
-    img_gray_db.copyTo(roi2);
+//     cv::Mat roi1 = cv::Mat(matchingImage, cv::Rect(0, 0, img_q_rgb.size().width, img_q_rgb.size().height));
+//     img_q_rgb.copyTo(roi1);
+//     cv::Mat roi2 = cv::Mat(matchingImage, cv::Rect(img_q_rgb.size().width, img_q_rgb.size().height, img_rgb_db.size().width, img_rgb_db.size().height));
+//     img_gray_db.copyTo(roi2);
 
-    std::vector<cv::DMatch> matches;
+//     std::vector<cv::DMatch> matches;
 
-    for (int ik=0; ik< kps_q.size(); ik++){
-        cv::KeyPoint kp = kps_q[ik];
-        cv::circle(matchingImage, kp.pt, cvRound(kp.size*0.25), cv::Scalar(255,255,0), 1, 8, 0);
-    }
-    std::vector<cv::Point2f> srcPoints;
-    std::vector<cv::Point2f> dstPoints;
-    findPairs(kps_q, mDescriptors_q, kps_db, mDescriptors_db, srcPoints, dstPoints);
-    char text[256];
-    sprintf(text, "%zd/%zd keypoints matched.", srcPoints.size(), kps_q.size());
-    putText(matchingImage, text, cv::Point(0, cvRound(img_gray_q.size().height + 30)), cv::FONT_HERSHEY_SCRIPT_SIMPLEX, 1, cv::Scalar(0,0,255));
+//     for (int ik=0; ik< kps_q.size(); ik++){
+//         cv::KeyPoint kp = kps_q[ik];
+//         cv::circle(matchingImage, kp.pt, cvRound(kp.size*0.25), cv::Scalar(255,255,0), 1, 8, 0);
+//     }
+//     std::vector<cv::Point2f> srcPoints;
+//     std::vector<cv::Point2f> dstPoints;
+//     findPairs(kps_q, mDescriptors_q, kps_db, mDescriptors_db, srcPoints, dstPoints);
+//     char text[256];
+//     sprintf(text, "%zd/%zd keypoints matched.", srcPoints.size(), kps_q.size());
+//     putText(matchingImage, text, cv::Point(0, cvRound(img_q_rgb.size().height + 30)), cv::FONT_HERSHEY_SCRIPT_SIMPLEX, 1, cv::Scalar(0,0,255));
     
-    // Draw line between nearest neighbor pairs
-    for (int i = 0; i < (int)srcPoints.size(); ++i) {
-      cv::Point2f pt1 = srcPoints[i];
-      cv::Point2f pt2 = dstPoints[i];
-      cv::Point2f from = pt1;
-      cv::Point2f to   = cv::Point(img_gray_q.size().width + pt2.x, img_gray_q.size().height + pt2.y);
-      line(matchingImage, from, to, cv::Scalar(0, 255, 255));
-    }
+//     // Draw line between nearest neighbor pairs
+//     for (int i = 0; i < (int)srcPoints.size(); ++i) {
+//       cv::Point2f pt1 = srcPoints[i];
+//       cv::Point2f pt2 = dstPoints[i];
+//       cv::Point2f from = pt1;
+//       cv::Point2f to   = cv::Point(img_q_rgb.size().width + pt2.x, img_q_rgb.size().height + pt2.y);
+//       line(matchingImage, from, to, cv::Scalar(0, 255, 255));
+//     }
     
-    // Display mathing image
-imshow("mywindow", matchingImage);
+//     // Display mathing image
+// imshow("mywindow", matchingImage);
 
 
 
@@ -880,9 +885,9 @@ imshow("mywindow", matchingImage);
     
     //std::cout << "keyp: " << keypoints[5].x << " " << keypoints[5].y << " " << keypoints[5].scale << " " << keypoints[5].orientation << std::endl;
     //std::cout << "cvkp: " << kps[5].pt.x << " " << kps[5].pt.y << " " << kps[5].size << " " << kps[5].angle  << std::endl; 
-    for (int di = 0; di < 5; di++) {
-        std::cout << "desc: " << mDescriptors_q.row(5+di*2) << std::endl;
-    }
+  //  for (int di = 0; di < 5; di++) {
+  //      std::cout << "desc: " << mDescriptors_q.row(5+di*2) << std::endl;
+  //  }
     uint32_t nb_loaded_keypoints = (uint32_t) keypoints.size();
     jpg_filename.replace( jpg_filename.size()-3,3,"jpg");
     exif_reader::open_exif( jpg_filename.c_str() );
@@ -1285,7 +1290,7 @@ imshow("mywindow", matchingImage);
         pcm.AddOrUpdateFrustum("2", sceneTransform, 1, 1, 0, 0, 2);
         
     }
-    ransac_solver.apply_RANSAC( c2D, c3D, nb_corr, std::max( float( minimal_RANSAC_solution ) / float( nb_corr ), min_inlier ) );
+ //   ransac_solver.apply_RANSAC( c2D, c3D, nb_corr, std::max( float( minimal_RANSAC_solution ) / float( nb_corr ), min_inlier ) );
     timer.Stop();
     RANSAC_time = timer.GetElapsedTime();
 
@@ -1297,27 +1302,27 @@ imshow("mywindow", matchingImage);
 
     // get the solution from RANSAC
     std::vector< uint32_t > inlier;
-    inlier.assign( ransac_solver.get_inliers().begin(), ransac_solver.get_inliers().end()  );
+ //   inlier.assign( ransac_solver.get_inliers().begin(), ransac_solver.get_inliers().end()  );
 
     // get the computed projection matrix
-    Util::Math::ProjMatrix proj_matrix = ransac_solver.get_projection_matrix();
+  //  Util::Math::ProjMatrix proj_matrix = ransac_solver.get_projection_matrix();
 
     // decompose the projection matrix
-    Util::Math::Matrix3x3 Rot, K;
-    proj_matrix.decompose( K, Rot );
-    proj_matrix.computeInverse();
-    proj_matrix.computeCenter();
-    std::cout << " camera calibration: " << K << std::endl;
-    std::cout << " camera rotation: " << Rot << std::endl;
-    std::cout << " camera position: " << proj_matrix.m_center << std::endl;
-    cv::Mat transform = cv::Mat::eye(4, 4, CV_64F);
+    // Util::Math::Matrix3x3 Rot, K;
+    // proj_matrix.decompose( K, Rot );
+    // proj_matrix.computeInverse();
+    // proj_matrix.computeCenter();
+    // std::cout << " camera calibration: " << K << std::endl;
+    // std::cout << " camera rotation: " << Rot << std::endl;
+    // std::cout << " camera position: " << proj_matrix.m_center << std::endl;
+    // cv::Mat transform = cv::Mat::eye(4, 4, CV_64F);
 
 
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) {
-        transform.at<double>(i, j) = Rot(i, j);
-      }
-    }
+    // for (int i = 0; i < 3; i++) {
+    //   for (int j = 0; j < 3; j++) {
+    //     transform.at<double>(i, j) = Rot(i, j);
+    //   }
+    // }
 
 // TODO: find out, why fx is sometimes negative in the calibration matrix
 // for now, as a workaround, just invert the 2nd and 3rd row of the rotation matrix:
@@ -1328,23 +1333,23 @@ imshow("mywindow", matchingImage);
    //   } 
  //   }
 
-    for (int i = 0; i < 3; i++)
-      transform.at<double>(i, 3) = proj_matrix.m_center[i] / scale;
+    // for (int i = 0; i < 3; i++)
+    //   transform.at<double>(i, 3) = proj_matrix.m_center[i] / scale;
     
-    std::cout << "adding camera frustum" << std::endl;
-    transform = transform.inv();
+    // std::cout << "adding camera frustum" << std::endl;
+    // transform = transform.inv();
 //    pcm.AddOrUpdateFrustum("1", transform, 1, 0, 1, 1, 2);
 
     //cv::Mat img; 
    // img = cv::imread(jpg_filenames[i], cv::IMREAD_COLOR);
     
-    if (img_gray_q.data) {
+    if (img_q_rgb.data) {
         for (int i = 0; i < c2D.size(); i+=2) {
             cv::Scalar color = cv::Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
-            cv::circle(img_gray_q, cv::Point(c2D[i] + (img_width-1.0)/2.0f, -c2D[i+1] + (img_height-1.0)/2.0f), 4.0, color);
+            cv::circle(img_q_rgb, cv::Point(c2D[i] + (img_width-1.0)/2.0f, -c2D[i+1] + (img_height-1.0)/2.0f), 4.0, color);
         }
-        cv::imshow("bw query", img_gray_q);
-        cv::waitKey(0);
+        cv::imshow("bw query", img_q_rgb);
+        cv::waitKey(5);
     }
       
     ofs_details << inlier.size() << " " << nb_corr << " " << vw_time << " " << corr_time << " " << RANSAC_time << " " << all_timer.GetElapsedTime() << std::endl;
@@ -1355,27 +1360,27 @@ imshow("mywindow", matchingImage);
 
     // determine whether the image was registered or not
     // also update the statistics about timing, ...
-    if( inlier.size() >= minimal_RANSAC_solution )
-    {
-      double N_reg = registered;
-      avrg_reg_time = avrg_reg_time * N_reg / (N_reg+1.0) + all_timer.GetElapsedTime() / (N_reg+1.0);
-      mean_inlier_ratio_accepted = mean_inlier_ratio_accepted * N_reg / (N_reg+1.0) + double(inlier.size()) / (double( nb_corr ) * (N_reg+1.0));
-      mean_nb_correspondences_accepted = mean_nb_correspondences_accepted * N_reg / (N_reg+1.0) + double(nb_corr) / (N_reg+1.0);
-      mean_nb_features_accepted = mean_nb_features_accepted * N_reg / (N_reg+1.0) + double(nb_loaded_keypoints) / (N_reg+1.0);
-      avrg_cor_computation_time_accepted = avrg_cor_computation_time_accepted * N_reg /(N_reg+1.0) + corr_time / (N_reg+1.0);
-      avrg_RANSAC_time_registered = avrg_RANSAC_time_registered * N_reg / (N_reg+1.0) + RANSAC_time / (N_reg+1.0);
-      ++registered;
-    }
-    else
-    {
-      avrg_reject_time = avrg_reject_time * N_reject / (N_reject+1.0) + all_timer.GetElapsedTime() / (N_reject+1.0);
-      mean_inlier_ratio_rejected = mean_inlier_ratio_rejected * N_reject / (N_reject+1.0) + double(inlier.size()) / (double( nb_corr ) * (N_reject+1.0));
-      mean_nb_correspondences_rejected = mean_nb_correspondences_rejected * N_reject / (N_reject+1.0) + double(nb_corr) / (N_reject+1.0);
-      mean_nb_features_rejected = mean_nb_features_rejected * N_reject / (N_reject+1.0) + double(nb_loaded_keypoints) / (N_reject+1.0);
-      avrg_cor_computation_time_rejected = avrg_cor_computation_time_rejected * N_reject /(N_reject+1.0) + corr_time / (N_reject+1.0);
-      avrg_RANSAC_time_rejected = avrg_RANSAC_time_rejected * N_reject / (N_reject+1.0) + RANSAC_time / (N_reject+1.0);
-      N_reject += 1.0;
-    }
+    // if( inlier.size() >= minimal_RANSAC_solution )
+    // {
+    //   double N_reg = registered;
+    //   avrg_reg_time = avrg_reg_time * N_reg / (N_reg+1.0) + all_timer.GetElapsedTime() / (N_reg+1.0);
+    //   mean_inlier_ratio_accepted = mean_inlier_ratio_accepted * N_reg / (N_reg+1.0) + double(inlier.size()) / (double( nb_corr ) * (N_reg+1.0));
+    //   mean_nb_correspondences_accepted = mean_nb_correspondences_accepted * N_reg / (N_reg+1.0) + double(nb_corr) / (N_reg+1.0);
+    //   mean_nb_features_accepted = mean_nb_features_accepted * N_reg / (N_reg+1.0) + double(nb_loaded_keypoints) / (N_reg+1.0);
+    //   avrg_cor_computation_time_accepted = avrg_cor_computation_time_accepted * N_reg /(N_reg+1.0) + corr_time / (N_reg+1.0);
+    //   avrg_RANSAC_time_registered = avrg_RANSAC_time_registered * N_reg / (N_reg+1.0) + RANSAC_time / (N_reg+1.0);
+    //   ++registered;
+    // }
+    // else
+    // {
+    //   avrg_reject_time = avrg_reject_time * N_reject / (N_reject+1.0) + all_timer.GetElapsedTime() / (N_reject+1.0);
+    //   mean_inlier_ratio_rejected = mean_inlier_ratio_rejected * N_reject / (N_reject+1.0) + double(inlier.size()) / (double( nb_corr ) * (N_reject+1.0));
+    //   mean_nb_correspondences_rejected = mean_nb_correspondences_rejected * N_reject / (N_reject+1.0) + double(nb_corr) / (N_reject+1.0);
+    //   mean_nb_features_rejected = mean_nb_features_rejected * N_reject / (N_reject+1.0) + double(nb_loaded_keypoints) / (N_reject+1.0);
+    //   avrg_cor_computation_time_rejected = avrg_cor_computation_time_rejected * N_reject /(N_reject+1.0) + corr_time / (N_reject+1.0);
+    //   avrg_RANSAC_time_rejected = avrg_RANSAC_time_rejected * N_reject / (N_reject+1.0) + RANSAC_time / (N_reject+1.0);
+    //   N_reject += 1.0;
+    // }
 
     // clean up
     // for( uint32_t j=0; j<nb_loaded_keypoints; ++j )
