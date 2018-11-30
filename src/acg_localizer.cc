@@ -22,6 +22,7 @@
  *                                                                           *
 \*===========================================================================*/
 
+#define WITH_PCL
 
 #define __STDC_LIMIT_MACROS
 
@@ -64,8 +65,11 @@
 // simple vector class for 3D points
 #include <OpenMesh/Core/Geometry/VectorT.hh>
 
+
 // 3D viewer
-#include "pointcloudmapping.h"
+#ifdef WITH_PCL
+    #include "pointcloudmapping.h"
+#endif
 
 const uint64_t sift_dim = 128;
 
@@ -596,8 +600,9 @@ int main (int argc, char **argv)
   // number of non-empty visual words, the number of 3D points and the total number of descriptors
   uint32_t nb_non_empty_vw, nb_3D_points, nb_descriptors;
 
-
+#ifdef WITH_PCL
   PointCloudMapping pcm(100);
+#endif
   
   for( uint32_t i=0; i<nb_clusters; ++i )
     vw_points_descriptors[i].clear();
@@ -650,9 +655,9 @@ int main (int argc, char **argv)
     delete [] point_data;
     delete [] color_data;
 
-
+#ifdef WITH_PCL
     pcm.AddPointCloud(points3D, colors_3D, scale);
-
+#endif
     // load the descriptors
     std::cout << "loading all descriptors" << std::endl;
     int tmp_int;
@@ -821,14 +826,19 @@ int main (int argc, char **argv)
     cv::Mat img_gray_q; 
     cv::cvtColor(img_q_rgb, img_gray_q, cv::COLOR_BGR2GRAY);
 
+    Timer featureTimer;
+    featureTimer.Init();
+    featureTimer.Start();
+
     cv::Ptr<cv::xfeatures2d::SiftFeatureDetector> detector = cv::xfeatures2d::SiftFeatureDetector::create();
 
-     std::vector<cv::KeyPoint> kps_q;
-     cv::Mat mDescriptors_q;
-     std::cout << "running sift detector on image size: " << img_gray_q.size() << " dim: " << img_gray_q.dims << " channels: " << img_gray_q.channels() << std::endl;
-     detector->detectAndCompute(img_gray_q, cv::noArray(), kps_q, mDescriptors_q);
-     std::cout << "computed " << mDescriptors_q.rows << " descriptors. Type: " << mDescriptors_q.type() << std::endl;
-
+    std::vector<cv::KeyPoint> kps_q;
+    cv::Mat mDescriptors_q;
+    std::cout << "running sift detector on image size: " << img_gray_q.size() << " dim: " << img_gray_q.dims << " channels: " << img_gray_q.channels() << std::endl;
+    detector->detectAndCompute(img_gray_q, cv::noArray(), kps_q, mDescriptors_q);
+    featureTimer.Stop();
+    std::cout << "computed " << mDescriptors_q.rows << " descriptors. Type: " << mDescriptors_q.type() << std::endl;
+    std::cout << "Feature extraction took " << featureTimer.GetElapsedTimeAsString() << " seconds" << std::endl;
 
 //     cv::Mat img_rgb_db = cv::imread("/home/mikhail/Documents/RTAB-Map/office_november/images/1.jpg", CV_LOAD_IMAGE_ANYCOLOR);
 //     cv::Mat img_gray_db; 
@@ -1220,8 +1230,9 @@ int main (int argc, char **argv)
 
 
     // visualize the correspondences: 3d points in the point cloud viewer and the 2d features in the image
+#ifdef WITH_PCL
     pcm.Add2D3DCorrespondencesToPointCloud(c3D);
-    
+#endif    
     ////
     // do the pose verification using RANSAC
 
@@ -1287,8 +1298,9 @@ int main (int argc, char **argv)
         sceneTransform.at<double>(3, 3) = 1;
       //  sceneTransform = sceneTransform.inv();
         std::cout << "adding camera pose to scene: " << std::endl <<  sceneTransform << std::endl;
+    #ifdef WITH_PCL
         pcm.AddOrUpdateFrustum("2", sceneTransform, 1, 1, 0, 0, 2);
-        
+    #endif
     }
  //   ransac_solver.apply_RANSAC( c2D, c3D, nb_corr, std::max( float( minimal_RANSAC_solution ) / float( nb_corr ), min_inlier ) );
     timer.Stop();

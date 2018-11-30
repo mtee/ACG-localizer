@@ -22,7 +22,6 @@
 
 #include <vector>
 
-#include <opencv/cv.h>
 #include <opencv2/core.hpp>
 #include <opencv2/core/core.hpp>
 #include "opencv2/opencv.hpp"
@@ -36,6 +35,7 @@
 #include <pcl/common/common_headers.h>
 #include <pcl/point_types.h>
 #include <pcl/io/ply_io.h>
+
 #include <pcl/common/geometry.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/visualization/pcl_visualizer.h>

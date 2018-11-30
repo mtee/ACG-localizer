@@ -1,4 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
+#prevent warnings about relative paths from hapening
+cmake_policy(SET CMP0015 NEW)
 
 if (EXISTS "${CMAKE_SOURCE_DIR}/cmake")
   set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
@@ -8,8 +10,6 @@ find_package (LAPACK)
 find_package (GMM)
 find_package (OpenMesh)
 find_package(PCL 1.8.1 REQUIRED)
-
-add_definitions(${PCL_DEFINITIONS})
 
 #find_package (FLANN)
 set(FLANN_INCLUDE_DIR /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/src/cpp)
@@ -55,6 +55,14 @@ set (sfm_HDR sfm/parse_bundler.hh sfm/bundler_camera.hh)
 set (solver_SRC solver/solverbase.cc solver/solverproj.cc)
 set (solver_HDR solver/solverbase.hh solver/solverproj.hh)
 
+
+if(PCL_FOUND)
+    add_definitions(${PCL_DEFINITIONS})
+    link_directories (${PCL_LIBRARY_DIRS})
+    include_directories (${PCL_INCLUDE_DIRS})
+endif(PCL_FOUND)
+
+
 include_directories (
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${LAPACK_INCLUDE_DIR}
@@ -62,7 +70,6 @@ include_directories (
   ${OPENMESH_INCLUDE_DIR}
   ${FLANN_INCLUDE_DIR}
   ${ANN_INCLUDE_DIR}
-  ${PCL_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
 
@@ -71,7 +78,6 @@ link_directories (
   ${OPENMESH_LIBRARY_DIR}
   ${ANN_LIBRARY_DIR}
   ${FLANN_LIBRARY_DIR}
-  ${PCL_LIBRARY_DIRS}
   ${OpenCV_LIBS}
 )
 
@@ -80,7 +86,11 @@ link_directories (
 # set sources for the executables
 add_executable (Bundle2Info features/SIFT_loader.cc features/SIFT_keypoint.hh features/SIFT_loader.hh ${sfm_SRC} ${sfm_HDR} math/matrix3x3.cc math/matrix4x4.cc math/matrixbase.cc math/projmatrix.cc math/matrix3x3.hh math/matrix4x4.hh math/matrixbase.hh math/projmatrix.hh Bundle2Info )
 add_executable (compute_desc_assignments compute_desc_assignments.cc ${sfm_SRC} ${sfm_HDR} ${features_SRC} math/matrix3x3.cc math/matrix4x4.cc math/matrixbase.cc math/projmatrix.cc math/matrix3x3.hh math/matrix4x4.hh math/matrixbase.hh math/projmatrix.hh ${features_HDR} )
-add_executable (acg_localizer ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR}  ${solver_SRC} ${solver_HDR} RANSAC.hh RANSAC.cc acg_localizer.cc pointcloudmapping.cpp vtkImageMatSource.cpp )
+if(PCL_FOUND)
+    add_executable (acg_localizer ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR}  ${solver_SRC} ${solver_HDR} RANSAC.hh RANSAC.cc acg_localizer.cc pointcloudmapping.cpp vtkImageMatSource.cpp )
+else(PCL_FOUND)
+    add_executable (acg_localizer ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR}  ${solver_SRC} ${solver_HDR} RANSAC.hh RANSAC.cc acg_localizer.cc)
+endif(PCL_FOUND)
 add_executable (acg_localizer_knn ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR} ${solver_SRC} ${solver_HDR} RANSAC.hh RANSAC.cc acg_localizer_knn.cc )
 add_executable (acg_localizer_active_search ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR}  ${solver_SRC} ${solver_HDR} ${sfm_SRC} ${sfm_HDR} RANSAC.hh RANSAC.cc acg_localizer_active_search.cc )
 
