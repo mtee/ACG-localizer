@@ -9,7 +9,8 @@ endif ()
 find_package (LAPACK)
 find_package (GMM)
 find_package (OpenMesh)
-find_package(PCL 1.8.1 REQUIRED)
+find_package(PCL 1.8.1 QUIET)
+find_package( ANN REQUIRED )
 
 #find_package (FLANN)
 set(FLANN_INCLUDE_DIR /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/src/cpp)
@@ -31,9 +32,10 @@ else(NOT OpenCV_FOUND)
         message(STATUS "OpenCV Link Libraries: ${OpenCV_LIBS}")
 endif(NOT OpenCV_FOUND)
 
+
 #ANN
-set(ANN_INCLUDE_DIR /home/mikhail/workspace/ACG-localizer/ann_1.1.2/include)
-set(ANN_LIBRARY /home/mikhail/workspace/ACG-localizer/ann_1.1.2/lib/libANN.a)
+#set(ANN_INCLUDE_DIR /home/mikhail/workspace/ACG-localizer/ann_1.1.2/include)
+#set(ANN_LIBRARY /home/mikhail/workspace/ACG-localizer/ann_1.1.2/lib/libANN.a)
 
 # source and header of the exif reader
 set (exif_SRC exif_reader/exif_reader.cc exif_reader/jhead-2.90/exif.cc exif_reader/jhead-2.90/gpsinfo.cc exif_reader/jhead-2.90/iptc.cc exif_reader/jhead-2.90/jhead.cc exif_reader/jhead-2.90/jpgfile.cc exif_reader/jhead-2.90/makernote.cc exif_reader/jhead-2.90/paths.cc )
@@ -123,7 +125,7 @@ target_link_libraries (acg_localizer_knn
   ${LAPACK_LIBRARIES}
   ${GMM_LIBRARY}
   ${FLANN_LIBRARY}
-  ${ANN_LIBRARY}
+  ${ANN_LIBRARIES}
 )
 
 target_link_libraries (acg_localizer_active_search
@@ -132,7 +134,7 @@ target_link_libraries (acg_localizer_active_search
   ${LAPACK_LIBRARIES}
   ${GMM_LIBRARY}
   ${FLANN_LIBRARY}
-  ${ANN_LIBRARY}
+  ${ANN_LIBRARIES}
 )
 
 # install the executables

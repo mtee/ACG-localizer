@@ -1072,7 +1072,7 @@ int main (int argc, char **argv)
     nb_points_per_component[ *it ] += 1;
 
   // for every connected component, get pointers to its 3D points
-  float **points_per_component[ nb_connected_components ];
+  double **points_per_component[ nb_connected_components ];
   uint32_t *indices_per_component[ nb_connected_components ];
 
   // store pointers to the appropriate points
@@ -1081,14 +1081,14 @@ int main (int argc, char **argv)
 
     for( uint32_t i=0; i<nb_connected_components; ++i )
     {
-      points_per_component[i] = new float*[ nb_points_per_component[i] ];
+      points_per_component[i] = new double*[ nb_points_per_component[i] ];
       indices_per_component[i] = new uint32_t[ nb_points_per_component[i] ];
     }
 
     for( uint32_t i=0; i<nb_3D_points; ++i )
     {
       uint32_t cc_id = connected_component_id_per_point[i];
-      points_per_component[ cc_id ][ cc_point_counter[ cc_id ] ] = (float*)points3D[i];
+      points_per_component[ cc_id ][ cc_point_counter[ cc_id ] ] = (double*)points3D[i];
       indices_per_component[ cc_id ][ cc_point_counter[ cc_id ] ] = i;
       cc_point_counter[ cc_id ] += 1;
     }
@@ -1100,7 +1100,7 @@ int main (int argc, char **argv)
   for( uint32_t i=0; i<nb_connected_components; ++i )
   {
     int nb_points_3D_int = (int) nb_points_per_component[i];
-    kd_trees[i] = new ANNkd_tree( points_per_component[i], nb_points_3D_int, 3 );
+    kd_trees[i] = new ANNkd_tree( points_per_component[i], nb_points_3D_int, 3, 1);
   }
 
   int nb_points_3D_int = (int) nb_3D_points;

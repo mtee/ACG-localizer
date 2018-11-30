@@ -1,22 +1,18 @@
-# - Find ANN
-# Find the native ANN includes and library
-# This module defines
+# This module finds libann.
 #
-#  ANN_INCLUDE_DIR, where to find ANN/ANN.h, etc.
-#  ANN_LIBRARIES, the libraries needed to use ANN.
-#  ANN_FOUND, If false, do not try to use ANN.
-# also defined, but not for general use are
-#  ANN_LIBRARY, where to find the ANN library.
+# It sets the following variables:
+#  ANN_FOUND              - Set to false, or undefined, if lemon isn't found.
+#  ANN_INCLUDE_DIR        - include directory.
+#  ANN_LIBRARIES          - library files
+FIND_PATH(ANN_INCLUDE_DIR ANN/ANN.h PATHS /usr/include /usr/local/include ${CMAKE_INCLUDE_PATH} ${CMAKE_PREFIX_PATH}/include ENV C_INCLUDE_PATH ENV CPLUS_INCLUDE_PATH)
+FIND_LIBRARY(ANN_LIBRARIES ann PATHS ENV LD_LIBRARY_PATH ENV LIBRARY_PATH)
 
-include(FindPackageHandleStandardArgs)
+GET_FILENAME_COMPONENT(ANN_LIBRARY_PATH $ANN_LIBRARIES} PATH)
+SET( ANN_LIBRARY_DIR ${LEMON_LIBRARY_PATH} CACHE PATH "Path to ANN library.")
 
-find_path(ANN_INCLUDE_DIR ANN/ANN.h)
-find_library(ANN_LIBRARY ANN)
+# handle the QUIETLY and REQUIRED arguments and set ANN_FOUND to TRUE if 
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ANN DEFAULT_MSG ANN_LIBRARIES ANN_INCLUDE_DIR)
 
-find_package_handle_standard_args(ANN DEFAULT_MSG
-  ANN_LIBRARY ANN_INCLUDE_DIR)
-
-if(ANN_FOUND)
-  set(ANN_INCLUDE_DIRS ${ANN_INCLUDE_DIR})
-  set(ANN_LIBRARIES ${ANN_LIBRARY})
-endif()
+MARK_AS_ADVANCED( ANN_INCLUDE_DIR ANN_LIBRARIES ANN_LIBRARY_DIR )
