@@ -440,6 +440,55 @@ std::cout << "added" << std::endl;
     keyFrameUpdated.notify_one();
 }
 
+
+void PointCloudMapping::AddPointCloud(double** points, std::vector<cv::Vec3b> colorList, float scale)
+{
+    boost::unique_lock<mutex> updateLock(updateModelMutex);
+    std::cout << "adding point cloud with points: " << colorList.size() << std::endl;
+    //    ms << "Adding test frame to the cloud\n";
+
+    // remove padding
+    //      color = color.rowRange(padding, color.rows - padding).colRange(padding, color.cols - padding);
+
+    // rescale back to standard size
+    //      if((color.cols != iWidth) || (color.rows != iHeight)) {
+    //          cv::resize(color, color, cv::Size(iWidth, iHeight));
+    //       }
+
+    PointCloud::Ptr tmp(new PointCloud());
+    float range = 1000;
+    for (int i = 0; i < colorList.size(); i++)
+    {
+        PointT p;
+        p.x = (double)points[i][0] / scale; 
+        p.y = (double)points[i][1] / scale; 
+        p.z = (double)points[i][2] / scale;
+
+        p.b = (unsigned char) colorList[i][2];
+        p.g = (unsigned char) colorList[i][1];
+        p.r = (unsigned char) colorList[i][0];
+
+        p.a = 255;
+        if (p.x < range && p.y < range && p.x > -range && p.y > -range)
+            tmp->points.push_back(p);
+    }
+    tmp->is_dense = false;
+
+    *globalMap += *tmp;
+
+    updated = true;
+    filtered = true;
+
+    // cv::Mat cameraMatrix = AddOrUpdateFrustum(frustumId, tCloned, 0.5, 255, 0, 0);
+    if (!this->visualizer->updatePointCloud(globalMap, "cloud"))
+    {
+        pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(globalMap);
+        this->visualizer->addPointCloud(globalMap, rgb, "cloud");
+    }
+std::cout << "added" << std::endl;
+    keyFrameUpdated.notify_one();
+}
+
 void PointCloudMapping::AddPointCloud(cv::Mat transform, cv::Mat color, img_coord_t &cloud, std::string frustumId)
 {
     boost::unique_lock<mutex> updateLock(updateModelMutex);
@@ -697,7 +746,7 @@ void PointCloudMapping::RemoveFrustum(const std::string &id)
 void PointCloudMapping::AddOrUpdateFrustum(
     const std::string &id,
     const cv::Mat &transform,
-    float scale, int r, int g, int b, float lineWidth)
+    float scale, double r, double g, double b, double lineWidth)
 {
     if (id.empty())
     {
@@ -732,7 +781,7 @@ void PointCloudMapping::AddOrUpdateFrustum(
             Eigen::Transform<float, 3, Eigen::Affine> t;
             
 
-            cv::Mat transformResult = transform.inv() * opticalRotInv;
+            cv::Mat transformResult = transform * opticalRotInv;
            // cv::Mat transformResult = transform * opticalRotInv;
            //cv::Mat transformResult = transform;
            // cv::Mat transformResult = transform.inv();

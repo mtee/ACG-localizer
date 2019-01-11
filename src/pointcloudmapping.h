@@ -35,7 +35,6 @@
 #include <pcl/common/common_headers.h>
 #include <pcl/point_types.h>
 #include <pcl/io/ply_io.h>
-
 #include <pcl/common/geometry.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/visualization/pcl_visualizer.h>
@@ -74,6 +73,7 @@ public:
     void keyboardEventOccurred (const pcl::visualization::KeyboardEvent &event, void* junk);
     void AddPointCloud(cv::Mat transform, cv::Mat color, img_coord_t& _cloud, std::string frustumId);
     void AddPointCloud(std::vector<cv::Vec3f> pointList, std::vector<cv::Vec3b> colorsList,float scale = 1);
+    void AddPointCloud(double** pointList, std::vector<cv::Vec3b> colorsList,float scale = 1);
     void AddTrainingFrameToPointCloud(cv::Mat& camMatrix, cv::Mat transform, cv::Mat color, cv::Mat depth, std::string frustumId);
     void AddMeshToPointCloud(cv::Mat& camMatrix, cv::Mat transform, cv::Mat color, cv::Mat depth, std::string frustumId);
     cv::Mat AddTestFrameToPointCloud(cv::Mat& camMatrix, cv::Mat transform, cv::Mat color, cv::Mat depth, img_coord_t& cloud, cv::Mat_<cv::Point2i>& sampling, std::string frustumId);
@@ -84,7 +84,7 @@ public:
     void Visualize();
     void OptimizePointCloud();
     void RemoveFrustum(const std::string & id);
-    void AddOrUpdateFrustum(const std::string & id, const cv::Mat & cvtransform, float scale, int r, int g, int b, float lineWidth);
+    void AddOrUpdateFrustum(const std::string & id, const cv::Mat & cvtransform, float scale, double r, double g, double b, double lineWidth);
     void pointPickingEventOccurred (const pcl::visualization::PointPickingEvent& event, void* viewer_void);
     pcl::IndicesPtr radiusFiltering(pcl::PointCloud<PointT>::Ptr & cloud, const pcl::IndicesPtr & indices, float radiusSearch, int minNeighborsInRadius);
     cv::Vec3f GetCloudCentroid();

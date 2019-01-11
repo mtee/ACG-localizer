@@ -1,3 +1,0 @@
-frames/1.png
-frames/327.png
-frames/432.png

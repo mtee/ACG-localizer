@@ -16,6 +16,11 @@ find_package( ANN REQUIRED )
 set(FLANN_INCLUDE_DIR /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/src/cpp)
 set(FLANN_LIBRARY /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib/libflann_cpp_s.a)
 
+find_package(CUDA)
+if (NOT CUDA_FOUND)
+    message(STATUS "CUDA not found. Project will not be built.")
+endif(NOT CUDA_FOUND)
+
 # OpenCV
 find_package(OpenCV REQUIRED)
 if(NOT OpenCV_FOUND)
@@ -90,11 +95,13 @@ add_executable (Bundle2Info features/SIFT_loader.cc features/SIFT_keypoint.hh fe
 add_executable (compute_desc_assignments compute_desc_assignments.cc ${sfm_SRC} ${sfm_HDR} ${features_SRC} math/matrix3x3.cc math/matrix4x4.cc math/matrixbase.cc math/projmatrix.cc math/matrix3x3.hh math/matrix4x4.hh math/matrixbase.hh math/projmatrix.hh ${features_HDR} )
 if(PCL_FOUND)
     add_executable (acg_localizer ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR}  ${solver_SRC} ${solver_HDR} RANSAC.hh RANSAC.cc acg_localizer.cc pointcloudmapping.cpp vtkImageMatSource.cpp )
+    add_executable (acg_localizer_active_search ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR}  ${solver_SRC} ${solver_HDR} ${sfm_SRC} ${sfm_HDR} RANSAC.hh RANSAC.cc acg_localizer_active_search.cc pointcloudmapping.cpp vtkImageMatSource.cpp )
 else(PCL_FOUND)
     add_executable (acg_localizer ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR}  ${solver_SRC} ${solver_HDR} RANSAC.hh RANSAC.cc acg_localizer.cc)
+    add_executable (acg_localizer_active_search ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR}  ${solver_SRC} ${solver_HDR} ${sfm_SRC} ${sfm_HDR} RANSAC.hh RANSAC.cc acg_localizer_active_search.cc )
 endif(PCL_FOUND)
 add_executable (acg_localizer_knn ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR} ${solver_SRC} ${solver_HDR} RANSAC.hh RANSAC.cc acg_localizer_knn.cc )
-add_executable (acg_localizer_active_search ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR}  ${solver_SRC} ${solver_HDR} ${sfm_SRC} ${sfm_HDR} RANSAC.hh RANSAC.cc acg_localizer_active_search.cc )
+
 
 # set libraries to link against
 target_link_libraries (Bundle2Info
@@ -129,6 +136,8 @@ target_link_libraries (acg_localizer_knn
 )
 
 target_link_libraries (acg_localizer_active_search
+  ${OpenCV_LIBS}
+  ${PCL_LIBRARIES}
   ${OPENMESH_LIBRARY}
   ${LAPACK_LIBRARY}
   ${LAPACK_LIBRARIES}
