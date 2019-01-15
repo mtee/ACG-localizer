@@ -74,6 +74,7 @@ public:
     void AddPointCloud(cv::Mat transform, cv::Mat color, img_coord_t& _cloud, std::string frustumId);
     void AddPointCloud(std::vector<cv::Vec3f> pointList, std::vector<cv::Vec3b> colorsList,float scale = 1);
     void AddPointCloud(double** pointList, std::vector<cv::Vec3b> colorsList,float scale = 1);
+    int AddPointCloud(std::string filePath);
     void AddTrainingFrameToPointCloud(cv::Mat& camMatrix, cv::Mat transform, cv::Mat color, cv::Mat depth, std::string frustumId);
     void AddMeshToPointCloud(cv::Mat& camMatrix, cv::Mat transform, cv::Mat color, cv::Mat depth, std::string frustumId);
     cv::Mat AddTestFrameToPointCloud(cv::Mat& camMatrix, cv::Mat transform, cv::Mat color, cv::Mat depth, img_coord_t& cloud, cv::Mat_<cv::Point2i>& sampling, std::string frustumId);

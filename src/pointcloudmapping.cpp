@@ -373,15 +373,16 @@ cv::Mat PointCloudMapping::AddTestFrameToPointCloud(cv::Mat &A, cv::Mat transfor
     return transform;
 }
 
-
-void PointCloudMapping::Add2D3DCorrespondencesToPointCloud(std::vector< float > c3D) {
+void PointCloudMapping::Add2D3DCorrespondencesToPointCloud(std::vector<float> c3D)
+{
     PointCloud::Ptr tmp(new PointCloud());
     cv::RNG rng(12345);
-    for (int i = 0; i < c3D.size(); i+=3) {
+    for (int i = 0; i < c3D.size(); i += 3)
+    {
         PointT p;
         p.x = c3D[i];
-        p.y = c3D[i+1];
-        p.z = c3D[i+2];
+        p.y = c3D[i + 1];
+        p.z = c3D[i + 2];
         p.r = rng.uniform(0, 255);
         p.g = rng.uniform(0, 255);
         p.b = rng.uniform(0, 255);
@@ -391,6 +392,29 @@ void PointCloudMapping::Add2D3DCorrespondencesToPointCloud(std::vector< float > 
     *displayCloud = *tmp;
 }
 
+int PointCloudMapping::AddPointCloud(std::string cloudpath)
+{
+    PointCloud::Ptr tmp(new PointCloud());
+    if (pcl::io::loadPLYFile<PointT>(cloudpath.c_str(), *tmp) == -1) //* load the file
+    {
+        PCL_ERROR("Couldn't read file test_pcd.pcd \n");
+        return (-1);
+    }
+    std::cout << "Loaded "
+              << tmp->width * tmp->height
+              << " data points from " << cloudpath 
+              << std::endl;
+    *globalMap += *tmp;
+    updated = true;
+    filtered = true;
+    if (!this->visualizer->updatePointCloud(globalMap, "cloud"))
+    {
+        pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(globalMap);
+        this->visualizer->addPointCloud(globalMap, rgb, "cloud");
+    }
+    std::cout << "added" << std::endl;
+    keyFrameUpdated.notify_one();
+}
 
 void PointCloudMapping::AddPointCloud(std::vector<cv::Vec3f> points, std::vector<cv::Vec3b> colorList, float scale)
 {
@@ -411,13 +435,13 @@ void PointCloudMapping::AddPointCloud(std::vector<cv::Vec3f> points, std::vector
     for (int i = 0; i < points.size(); i++)
     {
         PointT p;
-        p.x = (double)points[i][0] / scale; 
-        p.y = (double)points[i][1] / scale; 
+        p.x = (double)points[i][0] / scale;
+        p.y = (double)points[i][1] / scale;
         p.z = (double)points[i][2] / scale;
 
-        p.b = (unsigned char) colorList[i][2];
-        p.g = (unsigned char) colorList[i][1];
-        p.r = (unsigned char) colorList[i][0];
+        p.b = (unsigned char)colorList[i][2];
+        p.g = (unsigned char)colorList[i][1];
+        p.r = (unsigned char)colorList[i][0];
 
         p.a = 255;
         if (p.x < range && p.y < range && p.x > -range && p.y > -range)
@@ -436,12 +460,11 @@ void PointCloudMapping::AddPointCloud(std::vector<cv::Vec3f> points, std::vector
         pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(globalMap);
         this->visualizer->addPointCloud(globalMap, rgb, "cloud");
     }
-std::cout << "added" << std::endl;
+    std::cout << "added" << std::endl;
     keyFrameUpdated.notify_one();
 }
 
-
-void PointCloudMapping::AddPointCloud(double** points, std::vector<cv::Vec3b> colorList, float scale)
+void PointCloudMapping::AddPointCloud(double **points, std::vector<cv::Vec3b> colorList, float scale)
 {
     boost::unique_lock<mutex> updateLock(updateModelMutex);
     std::cout << "adding point cloud with points: " << colorList.size() << std::endl;
@@ -460,13 +483,13 @@ void PointCloudMapping::AddPointCloud(double** points, std::vector<cv::Vec3b> co
     for (int i = 0; i < colorList.size(); i++)
     {
         PointT p;
-        p.x = (double)points[i][0] / scale; 
-        p.y = (double)points[i][1] / scale; 
+        p.x = (double)points[i][0] / scale;
+        p.y = (double)points[i][1] / scale;
         p.z = (double)points[i][2] / scale;
 
-        p.b = (unsigned char) colorList[i][2];
-        p.g = (unsigned char) colorList[i][1];
-        p.r = (unsigned char) colorList[i][0];
+        p.b = (unsigned char)colorList[i][2];
+        p.g = (unsigned char)colorList[i][1];
+        p.r = (unsigned char)colorList[i][0];
 
         p.a = 255;
         if (p.x < range && p.y < range && p.x > -range && p.y > -range)
@@ -485,14 +508,14 @@ void PointCloudMapping::AddPointCloud(double** points, std::vector<cv::Vec3b> co
         pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(globalMap);
         this->visualizer->addPointCloud(globalMap, rgb, "cloud");
     }
-std::cout << "added" << std::endl;
+    std::cout << "added" << std::endl;
     keyFrameUpdated.notify_one();
 }
 
 void PointCloudMapping::AddPointCloud(cv::Mat transform, cv::Mat color, img_coord_t &cloud, std::string frustumId)
 {
     boost::unique_lock<mutex> updateLock(updateModelMutex);
-    
+
     //    ms << "Adding test frame to the cloud\n";
 
     // remove padding
@@ -779,12 +802,11 @@ void PointCloudMapping::AddOrUpdateFrustum(
             // Transform
 
             Eigen::Transform<float, 3, Eigen::Affine> t;
-            
 
             cv::Mat transformResult = transform * opticalRotInv;
-           // cv::Mat transformResult = transform * opticalRotInv;
-           //cv::Mat transformResult = transform;
-           // cv::Mat transformResult = transform.inv();
+            // cv::Mat transformResult = transform * opticalRotInv;
+            //cv::Mat transformResult = transform;
+            // cv::Mat transformResult = transform.inv();
             for (int i = 0; i < 4; i++)
             {
                 t(i, 0) = (float)transformResult.at<double>(i, 0);

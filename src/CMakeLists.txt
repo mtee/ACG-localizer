@@ -5,7 +5,9 @@ cmake_policy(SET CMP0015 NEW)
 if (EXISTS "${CMAKE_SOURCE_DIR}/cmake")
   set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 endif ()
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 find_package (LAPACK)
 find_package (GMM)
 find_package (OpenMesh)
@@ -88,62 +90,90 @@ link_directories (
   ${OpenCV_LIBS}
 )
 
-
-
 # set sources for the executables
-add_executable (Bundle2Info features/SIFT_loader.cc features/SIFT_keypoint.hh features/SIFT_loader.hh ${sfm_SRC} ${sfm_HDR} math/matrix3x3.cc math/matrix4x4.cc math/matrixbase.cc math/projmatrix.cc math/matrix3x3.hh math/matrix4x4.hh math/matrixbase.hh math/projmatrix.hh Bundle2Info )
-add_executable (compute_desc_assignments compute_desc_assignments.cc ${sfm_SRC} ${sfm_HDR} ${features_SRC} math/matrix3x3.cc math/matrix4x4.cc math/matrixbase.cc math/projmatrix.cc math/matrix3x3.hh math/matrix4x4.hh math/matrixbase.hh math/projmatrix.hh ${features_HDR} )
-if(PCL_FOUND)
-    add_executable (acg_localizer ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR}  ${solver_SRC} ${solver_HDR} RANSAC.hh RANSAC.cc acg_localizer.cc pointcloudmapping.cpp vtkImageMatSource.cpp )
-    add_executable (acg_localizer_active_search ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR}  ${solver_SRC} ${solver_HDR} ${sfm_SRC} ${sfm_HDR} RANSAC.hh RANSAC.cc acg_localizer_active_search.cc pointcloudmapping.cpp vtkImageMatSource.cpp )
-else(PCL_FOUND)
-    add_executable (acg_localizer ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR}  ${solver_SRC} ${solver_HDR} RANSAC.hh RANSAC.cc acg_localizer.cc)
-    add_executable (acg_localizer_active_search ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR}  ${solver_SRC} ${solver_HDR} ${sfm_SRC} ${sfm_HDR} RANSAC.hh RANSAC.cc acg_localizer_active_search.cc )
-endif(PCL_FOUND)
-add_executable (acg_localizer_knn ${exif_SRC} ${exif_HDR} ${features_SRC} ${features_HDR} timer.cc timer.hh ${math_SRC} ${math_HDR} ${solver_SRC} ${solver_HDR} RANSAC.hh RANSAC.cc acg_localizer_knn.cc )
+add_executable (Bundle2Info 
+    features/SIFT_loader.cc 
+    features/SIFT_keypoint.hh 
+    features/SIFT_loader.hh 
+    ${sfm_SRC} 
+    ${sfm_HDR} 
+    math/matrix3x3.cc 
+    math/matrix4x4.cc 
+    math/matrixbase.cc 
+    math/projmatrix.cc 
+    math/matrix3x3.hh 
+    math/matrix4x4.hh 
+    math/matrixbase.hh 
+    math/projmatrix.hh 
+    Bundle2Info )
+
+add_executable (compute_desc_assignments 
+    compute_desc_assignments.cc 
+    ${sfm_SRC} 
+    ${sfm_HDR} 
+    ${features_SRC} 
+    math/matrix3x3.cc 
+    math/matrix4x4.cc 
+    math/matrixbase.cc 
+    math/projmatrix.cc 
+    math/matrix3x3.hh 
+    math/matrix4x4.hh 
+    math/matrixbase.hh 
+    math/projmatrix.hh 
+    ${features_HDR} )
+
+add_library(acs_localizer SHARED
+    acs_localizer.cc
+    timer.cc
+    timer.hh
+    ${math_SRC}
+    ${math_HDR}
+    ${features_SRC}
+    ${features_HDR}
+    timer.cc
+    timer.hh
+    ${math_SRC}
+    ${math_HDR}
+    ${solver_SRC}
+    ${solver_HDR}
+    ${sfm_SRC}
+    ${sfm_HDR}
+    RANSAC.hh
+    RANSAC.cc 
+)
+target_link_libraries (acs_localizer
+    ${OpenCV_LIBS}
+    ${OPENMESH_LIBRARY}
+    ${LAPACK_LIBRARY}
+    ${LAPACK_LIBRARIES}
+    ${GMM_LIBRARY}
+    ${FLANN_LIBRARY}
+    ${ANN_LIBRARIES}
+)
+
 
 
 # set libraries to link against
 target_link_libraries (Bundle2Info
 )
 
+
 target_link_libraries (compute_desc_assignments
-  ${OPENMESH_LIBRARY}
-  ${LAPACK_LIBRARY}
-  ${LAPACK_LIBRARIES}
-  ${GMM_LIBRARY}
-  ${FLANN_LIBRARY}
-)
-
-target_link_libraries (acg_localizer
-  ${OpenCV_LIBS}
-  ${PCL_LIBRARIES}
-  ${OPENMESH_LIBRARY}
-  ${LAPACK_LIBRARY}
-  ${LAPACK_LIBRARIES}
-  ${GMM_LIBRARY}
-  ${FLANN_LIBRARY}
+    ${OPENMESH_LIBRARY}
+    ${LAPACK_LIBRARY}
+    ${LAPACK_LIBRARIES}
+    ${GMM_LIBRARY}
+    ${FLANN_LIBRARY}
 )
 
 
-target_link_libraries (acg_localizer_knn
-  ${OPENMESH_LIBRARY}
-  ${LAPACK_LIBRARY}
-  ${LAPACK_LIBRARIES}
-  ${GMM_LIBRARY}
-  ${FLANN_LIBRARY}
-  ${ANN_LIBRARIES}
-)
-
+add_executable(acg_localizer_active_search
+    acg_localizer_active_search.cc 
+    pointcloudmapping.cpp 
+    vtkImageMatSource.cpp )
 target_link_libraries (acg_localizer_active_search
-  ${OpenCV_LIBS}
-  ${PCL_LIBRARIES}
-  ${OPENMESH_LIBRARY}
-  ${LAPACK_LIBRARY}
-  ${LAPACK_LIBRARIES}
-  ${GMM_LIBRARY}
-  ${FLANN_LIBRARY}
-  ${ANN_LIBRARIES}
+    acs_localizer
+    ${PCL_LIBRARIES}
 )
 
 # install the executables
