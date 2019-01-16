@@ -187,6 +187,8 @@ int main(int argc, char **argv)
         std::set<size_t> unique_vw;
         cv::Mat trans;
         trans = loc.processImage(img_gray_q, camMatrix_undistorted, inliers, c2D, c3D, mDescriptors_q, unique_vw);
+        std::cout << "Pose: " << std::endl;
+        std::cout << trans << std::endl;
        // pcm.AddOrUpdateFrustum("2", trans, 1, 1, 0, 0, 2);
         uint32_t nb_corr = c2D.size() / 2;
         if (img_q_rgb.data)
