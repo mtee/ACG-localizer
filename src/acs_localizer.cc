@@ -41,12 +41,12 @@
 #include "timer.hh"
 
 // math functionality
-#include "math/projmatrix.hh"
-#include "math/matrix3x3.hh"
+#include "projmatrix.hh"
+#include "matrix3x3.hh"
 
 // tools to parse a bundler reconstruction
-#include "sfm/parse_bundler.hh"
-#include "sfm/bundler_camera.hh"
+#include "parse_bundler.hh"
+#include "bundler_camera.hh"
 
 // ANN Libary, used to perform search in 3D
 #include <ANN/ANN.h>

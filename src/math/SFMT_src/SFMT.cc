@@ -12,8 +12,8 @@
  */
 #include <string.h>
 #include <assert.h>
-#include "SFMT.hh"
-#include "SFMT-params.hh"
+#include "SFMT_src/SFMT.hh"
+#include "SFMT_src/SFMT-params.hh"
 
 #if defined(__BIG_ENDIAN__) && !defined(__amd64) && !defined(BIG_ENDIAN64)
 #define BIG_ENDIAN64 1

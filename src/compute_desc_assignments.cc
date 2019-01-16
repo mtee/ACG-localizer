@@ -39,7 +39,7 @@
 #include <map>
 #include <stdlib.h>
 
-#include "sfm/parse_bundler.hh"
+#include "parse_bundler.hh"
 
 #include "features/visual_words_handler.hh"
 

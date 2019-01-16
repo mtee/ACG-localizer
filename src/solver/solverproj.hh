@@ -37,9 +37,9 @@
 
 #include <vector>
 
-#include "../math/math.hh"
-#include "../math/matrix3x3.hh"
-#include "../math/projmatrix.hh"
+#include "math.hh"
+#include "matrix3x3.hh"
+#include "projmatrix.hh"
 #include "solverbase.hh"
 
 

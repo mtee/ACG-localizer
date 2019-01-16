@@ -40,8 +40,8 @@
 
 #include <OpenMesh/Core/Geometry/VectorT.hh>
 
-#include "../math/math.hh"
-#include "../math/matrix3x3.hh"
+#include "math.hh"
+#include "matrix3x3.hh"
 
 
 using namespace Util::Math;

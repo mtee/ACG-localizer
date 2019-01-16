@@ -33,7 +33,7 @@
 #include <climits>
 #include <sstream>
 
-#include "sfm/parse_bundler.hh"
+#include "parse_bundler.hh"
 
 int main (int argc, char **argv)
 {

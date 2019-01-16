@@ -21,14 +21,14 @@
 #include <queue>
 
 #include <opencv2/core.hpp>
-#include "features/visual_words_handler.hh"
+#include "visual_words_handler.hh"
 // math functionality
-#include "math/projmatrix.hh"
-#include "math/matrix3x3.hh"
+#include "projmatrix.hh"
+#include "matrix3x3.hh"
 
 // tools to parse a bundler reconstruction
-#include "sfm/parse_bundler.hh"
-#include "sfm/bundler_camera.hh"
+#include "parse_bundler.hh"
+#include "bundler_camera.hh"
 
 // RANSAC
 //#include "RANSAC.hh"
