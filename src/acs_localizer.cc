@@ -34,8 +34,8 @@
 #include <opencv2/xfeatures2d.hpp>
 
 // includes for classes dealing with SIFT-features
-#include "features/SIFT_loader.hh"
-#include "features/visual_words_handler.hh"
+#include "SIFT_loader.hh"
+#include "visual_words_handler.hh"
 
 // stopwatch
 #include "timer.hh"

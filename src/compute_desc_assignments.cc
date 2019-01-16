@@ -41,7 +41,7 @@
 
 #include "parse_bundler.hh"
 
-#include "features/visual_words_handler.hh"
+#include "visual_words_handler.hh"
 
 
 

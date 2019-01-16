@@ -50,8 +50,7 @@ int main(int argc, char **argv)
         std::cout << " -          T. Sattler, B. Leibe, L. Kobbelt. Improving Image-Based Localization by Active Correspondence Search.         - " << std::endl;
         std::cout << " -                               2012 by Torsten Sattler (tsattler@cs.rwth-aachen.de)                                     - " << std::endl;
         std::cout << " -                                                                                                                        - " << std::endl;
-        std::cout << " - usage: acg_localizer_active_search list bundle_file nb_cluster clusters descriptors prioritization_strategy results    - " << std::endl;
-        std::cout << " -                        N_3D ransac_pre_filter filter_points image_set_cover nb_cams_set_cover                          - " << std::endl;
+        std::cout << " - usage: acg_localizer_active_search list bundle_file nb_cluster clusters descriptors                                    - " << std::endl;
         std::cout << " - Parameters:                                                                                                            - " << std::endl;
         std::cout << " -  list                                                                                                                  - " << std::endl;
         std::cout << " -     List containing the filenames of all the .key files that should be used as query. It is assumed that the           - " << std::endl;

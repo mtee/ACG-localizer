@@ -40,8 +40,8 @@
 #include <stdint.h>
 #include <cstdlib>
 #include <string>
-#include "../features/SIFT_keypoint.hh"
-#include "../features/SIFT_loader.hh"
+#include "SIFT_keypoint.hh"
+#include "SIFT_loader.hh"
 #include "bundler_camera.hh"
 
 ////////////////////////////
