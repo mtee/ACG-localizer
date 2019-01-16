@@ -31,7 +31,7 @@
 #include "sfm/bundler_camera.hh"
 
 // RANSAC
-#include "RANSAC.hh"
+//#include "RANSAC.hh"
 
 // ANN Libary, used to perform search in 3D
 #include <ANN/ANN.h>
@@ -258,9 +258,6 @@ class ACSLocalizer
 
     // the number of nearest neighbors to search for in 3D
     int N_3D = 200;
-
-    // specify whether to use the RANSAC pre-filter (1) or not (0)
-    int ransac_filter = 1;
 
     // compute a set cover from the images or use the original images
     bool use_image_set_cover = true;

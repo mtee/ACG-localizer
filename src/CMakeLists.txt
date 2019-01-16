@@ -11,17 +11,17 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 find_package (LAPACK)
 find_package (GMM)
 find_package (OpenMesh)
-find_package(PCL 1.8.1 QUIET)
+#find_package(PCL 1.8.1 QUIET)
 find_package( ANN REQUIRED )
 
 #find_package (FLANN)
 set(FLANN_INCLUDE_DIR /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/src/cpp)
 set(FLANN_LIBRARY /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib/libflann_cpp_s.a)
 
-find_package(CUDA)
-if (NOT CUDA_FOUND)
-    message(STATUS "CUDA not found. Project will not be built.")
-endif(NOT CUDA_FOUND)
+# find_package(CUDA)
+# if (NOT CUDA_FOUND)
+#     message(STATUS "CUDA not found. Project will not be built.")
+# endif(NOT CUDA_FOUND)
 
 # OpenCV
 find_package(OpenCV REQUIRED)
@@ -40,14 +40,6 @@ else(NOT OpenCV_FOUND)
 endif(NOT OpenCV_FOUND)
 
 
-#ANN
-#set(ANN_INCLUDE_DIR /home/mikhail/workspace/ACG-localizer/ann_1.1.2/include)
-#set(ANN_LIBRARY /home/mikhail/workspace/ACG-localizer/ann_1.1.2/lib/libANN.a)
-
-# source and header of the exif reader
-set (exif_SRC exif_reader/exif_reader.cc exif_reader/jhead-2.90/exif.cc exif_reader/jhead-2.90/gpsinfo.cc exif_reader/jhead-2.90/iptc.cc exif_reader/jhead-2.90/jhead.cc exif_reader/jhead-2.90/jpgfile.cc exif_reader/jhead-2.90/makernote.cc exif_reader/jhead-2.90/paths.cc )
-set (exif_HDR exif_reader/exif_reader.hh exif_reader/jhead-2.90/jhead.hh)
-
 # source and header of the feature library
 set (features_SRC features/SIFT_loader.cc features/visual_words_handler.cc)
 set (features_HDR features/SIFT_keypoint.hh features/SIFT_loader.hh features/visual_words_handler.hh)
@@ -65,11 +57,11 @@ set (solver_SRC solver/solverbase.cc solver/solverproj.cc)
 set (solver_HDR solver/solverbase.hh solver/solverproj.hh)
 
 
-if(PCL_FOUND)
-    add_definitions(${PCL_DEFINITIONS})
-    link_directories (${PCL_LIBRARY_DIRS})
-    include_directories (${PCL_INCLUDE_DIRS})
-endif(PCL_FOUND)
+#if(PCL_FOUND)
+#    add_definitions(${PCL_DEFINITIONS})
+#    link_directories (${PCL_LIBRARY_DIRS})
+#    include_directories (${PCL_INCLUDE_DIRS})
+#endif(PCL_FOUND)
 
 
 include_directories (
@@ -138,8 +130,6 @@ add_library(acs_localizer SHARED
     ${solver_HDR}
     ${sfm_SRC}
     ${sfm_HDR}
-    RANSAC.hh
-    RANSAC.cc 
 )
 target_link_libraries (acs_localizer
     ${OpenCV_LIBS}
@@ -169,11 +159,12 @@ target_link_libraries (compute_desc_assignments
 
 add_executable(acg_localizer_active_search
     acg_localizer_active_search.cc 
-    pointcloudmapping.cpp 
-    vtkImageMatSource.cpp )
+#    pointcloudmapping.cpp 
+#    vtkImageMatSource.cpp 
+    )
 target_link_libraries (acg_localizer_active_search
     acs_localizer
-    ${PCL_LIBRARIES}
+#    ${PCL_LIBRARIES}
 )
 
 # install the executables

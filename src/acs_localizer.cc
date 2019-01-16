@@ -48,9 +48,6 @@
 #include "sfm/parse_bundler.hh"
 #include "sfm/bundler_camera.hh"
 
-// RANSAC
-#include "RANSAC.hh"
-
 // ANN Libary, used to perform search in 3D
 #include <ANN/ANN.h>
 
@@ -107,11 +104,10 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
 
     std::vector<cv::KeyPoint> kps_q;
 
-    std::cout << "running sift detector on image size: " << img_gray_q.size() << " dim: " << img_gray_q.dims << " channels: " << img_gray_q.channels() << std::endl;
+//    std::cout << "running sift detector on image size: " << img_gray_q.size() << " dim: " << img_gray_q.dims << " channels: " << img_gray_q.channels() << std::endl;
     detector->detectAndCompute(img_gray_q, cv::noArray(), kps_q, mDescriptors_q);
     featureTimer.Stop();
-    std::cout << "computed " << mDescriptors_q.rows << " descriptors. Type: " << mDescriptors_q.type() << std::endl;
-    std::cout << "Feature extraction took " << featureTimer.GetElapsedTimeAsString() << " seconds" << std::endl;
+//    std::cout << "Feature extraction took " << featureTimer.GetElapsedTimeAsString() << " seconds" << std::endl;
     std::vector<SIFT_keypoint> keypoints;
     keypoints.resize(kps_q.size());
     for (int j = 0; j < mDescriptors_q.rows; j++)
@@ -137,11 +133,9 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
     std::cout << " loaded " << nb_loaded_keypoints << " descriptors" << std::endl;
 
     // assign the descriptors to the visual words
-    std::cout << "1"<< std::endl;
     Timer timer;
     timer.Init();
     timer.Start();
-    std::cout << "2"<< std::endl;
     computed_visual_words.clear();
     computed_visual_words_low_dim.clear();
     if (computed_visual_words.size() < nb_loaded_keypoints)
@@ -150,17 +144,14 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
         computed_visual_words_low_dim.resize(nb_loaded_keypoints);
     }
     unique_vw.clear();
-    std::cout << "3"<< std::endl;
     vw_handler.set_nb_paths(1);
-    std::cout << "4"<< std::endl;
     vw_handler.assign_visual_words_ucharv(mDescriptors_q, nb_loaded_keypoints, computed_visual_words);
-    std::cout << "5"<< std::endl;
     timer.Stop();
 
     for (size_t j = 0; j < nb_loaded_keypoints; ++j)
         unique_vw.insert(computed_visual_words[j]);
 
-    std::cout << " assigned visual words in " << timer.GetElapsedTimeAsString() << " to " << unique_vw.size() << " unique vw" << std::endl;
+//    std::cout << " assigned visual words in " << timer.GetElapsedTimeAsString() << " to " << unique_vw.size() << " unique vw" << std::endl;
 
     ////
     // establish 2D-3D correspondences by using the vw to compute pairwise nearest neighbors
@@ -537,9 +528,6 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
 
     ////
     // Establish the correspondences needed for RANSAC-based pose estimation
-
-    if (ransac_filter == 1)
-    {
         ////
         // Apply the RANSAC Pre-filter
         uint32_t max_set_size = 0;
@@ -656,36 +644,21 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
                 final_correspondences.push_back(std::make_pair(map_it_3D->second.first, map_it_3D->first));
             }
         }
-    }
-    else
-    {
-        // normal correspondence computation
-        // get the correspondences
-        for (map_it_3D = corr_3D_to_2D.begin(); map_it_3D != corr_3D_to_2D.end(); ++map_it_3D)
-        {
-            c2D.push_back(keypoints[map_it_3D->second.first].x);
-            c2D.push_back(keypoints[map_it_3D->second.first].y);
 
-            c3D.push_back(points3D[map_it_3D->first][0]);
-            c3D.push_back(points3D[map_it_3D->first][1]);
-            c3D.push_back(points3D[map_it_3D->first][2]);
 
-            final_correspondences.push_back(std::make_pair(map_it_3D->second.first, map_it_3D->first));
-        }
-    }
 
     timer.Stop();
-    std::cout << " computed correspondences in " << timer.GetElapsedTimeAsString() << ", considering " << nb_considered_points << " features "
-              << " ( " << double(nb_considered_points) / double(nb_loaded_keypoints) * 100.0 << " % ) " << std::endl;
+ //   std::cout << " computed correspondences in " << timer.GetElapsedTimeAsString() << ", considering " << nb_considered_points << " features "
+ //             << " ( " << double(nb_considered_points) / double(nb_loaded_keypoints) * 100.0 << " % ) " << std::endl;
 
     ////
     // do the pose verification using RANSAC
 
-    RANSAC::computation_type = P6pt;
-    RANSAC::stop_after_n_secs = true;
-    RANSAC::max_time = ransac_max_time;
-    RANSAC::error = 10.0f; // for P6pt this is the SQUARED reprojection error in pixels
-    RANSAC ransac_solver;
+ //   RANSAC::computation_type = P6pt;
+//    RANSAC::stop_after_n_secs = true;
+ //   RANSAC::max_time = ransac_max_time;
+ //   RANSAC::error = 10.0f; // for P6pt this is the SQUARED reprojection error in pixels
+//    RANSAC ransac_solver;
 
     uint32_t nb_corr = c2D.size() / 2;
 
@@ -708,13 +681,11 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
     int inlierCount = 0;
     if (corr2d.size() > 4)
     {
-        std::cout << " corr3d: " << corr3d.size() << " corr2d: " << corr2d.size() << std::endl;
-        std::cout << " corr3d: " << corr3d[0] << " corr2d: " << corr2d[0] << std::endl;
         cv::solvePnPRansac(corr3d, corr2d, camMatrix, cv::Mat(), rvec, tvec, false, 500, 8.0F, 0.99, inliers, CV_EPNP);
         inlierCount = inliers.size().height;
-        std::cout << "opencv ransac pnp. Translation " << std::endl
-                  << tvec << std::endl
-                  << "inlier count: " << inlierCount << std::endl;
+        // std::cout << "opencv ransac pnp. Translation " << std::endl
+        //           << tvec << std::endl
+        //           << "inlier count: " << inlierCount << std::endl;
 
         if (inlierCount > 10)
         {
@@ -818,7 +789,6 @@ int ACSLocalizer::init(std::string keylist, std::string bundle_file, uint32_t nb
     std::cout << " Early termination after finding " << max_cor_early_term << " correspondences " << std::endl;
     N_3D = _N_3D;
     std::cout << " Query expansion includes the next " << N_3D << " features " << std::endl;
-    ransac_filter = true;
     filter_points = true;
     use_image_set_cover = true;
     consider_K_nearest_cams = _consider_K_nearest_cams;

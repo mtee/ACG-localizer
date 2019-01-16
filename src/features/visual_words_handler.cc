@@ -620,13 +620,10 @@ bool visual_words_handler::assign_visual_words_uchar( std::vector< unsigned char
   */
 bool visual_words_handler::assign_visual_words_ucharv( cv::Mat descriptors, uint32_t nb_descriptors, std::vector< uint32_t > &assignments )
 {
-    std::cout << "a" << std::endl;
   if( assignments.size() < (size_t) nb_descriptors )
     assignments.resize(nb_descriptors);
-  std::cout << "b" << std::endl;
   if( mMethod == 0 )
   {
-        std::cout << "c" << std::endl;
     // do a linear search
     float vec[128];
     for( uint32_t i=0; i<nb_descriptors; ++i )
@@ -664,11 +661,9 @@ bool visual_words_handler::assign_visual_words_ucharv( cv::Mat descriptors, uint
   }
   else if( mMethod == 2 )
   {
-        std::cout << "d" << std::endl;
     // FLANN
     if( mFlannIndex == 0 )
       return false;
-      std::cout << "e" << std::endl;
     // copy the descriptors
     resize( nb_descriptors );
     for( uint32_t i=0; i<nb_descriptors; ++i )
@@ -683,22 +678,18 @@ bool visual_words_handler::assign_visual_words_ucharv( cv::Mat descriptors, uint
     if( mFlannIndexType == 0 )
     {
       flann::SearchParams params( FLANN_CHECKS_AUTOTUNED );
-        std::cout << "h" << std::endl;
       mFlannIndex->knnSearch( mFlannFeatures, mFlannAssignments, mFlannDistances, 1, params );
     }
     else
     {
       flann::SearchParams params( mNbPath );
-        std::cout << "i" << std::endl;
       mFlannIndex->knnSearch( mFlannFeatures, mFlannAssignments, mFlannDistances, 1, params );
     }
-      std::cout << "f" << std::endl;
     // copy the assignments
     for( uint32_t i=0; i<nb_descriptors; ++i )
     {
       assignments[i] = (uint32_t) mFlannAssignments.data[i];
     }
-      std::cout << "g" << std::endl;
     return true;
   }
   
