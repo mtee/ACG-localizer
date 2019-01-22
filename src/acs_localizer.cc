@@ -1,8 +1,6 @@
 #define __STDC_LIMIT_MACROS
 
-
 #include "acs_localizer.h"
-
 
 // C++ includes
 #include <vector>
@@ -37,9 +35,6 @@
 #include "SIFT_loader.hh"
 #include "visual_words_handler.hh"
 
-// stopwatch
-#include "timer.hh"
-
 // math functionality
 #include "projmatrix.hh"
 #include "matrix3x3.hh"
@@ -51,10 +46,8 @@
 // ANN Libary, used to perform search in 3D
 #include <ANN/ANN.h>
 
-namespace pca{
-
-
-
+namespace pca
+{
 
 // check whether two sets have a common element or not
 // sets are assumed to be stored in ascending order
@@ -80,8 +73,8 @@ bool set_intersection_test(const std::set<uint32_t> &a, const std::set<uint32_t>
     return false;
 }
 
-
-ACSLocalizer::ACSLocalizer(){
+ACSLocalizer::ACSLocalizer()
+{
     computed_visual_words.resize(50000);
     std::fill(computed_visual_words.begin(), computed_visual_words.end(), 0);
 
@@ -91,23 +84,17 @@ ACSLocalizer::ACSLocalizer(){
     features_per_vw.resize(1000);
 }
 
-
 cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Mat &inliers, std::vector<float> &c2D, std::vector<float> &c3D, cv::Mat &mDescriptors_q, std::set<size_t> &unique_vw)
 {
     cv::Mat out = cv::Mat::zeros(4, 4, CV_64F);
-
-    Timer featureTimer;
-    featureTimer.Init();
-    featureTimer.Start();
 
     cv::Ptr<cv::xfeatures2d::SiftFeatureDetector> detector = cv::xfeatures2d::SiftFeatureDetector::create();
 
     std::vector<cv::KeyPoint> kps_q;
 
-//    std::cout << "running sift detector on image size: " << img_gray_q.size() << " dim: " << img_gray_q.dims << " channels: " << img_gray_q.channels() << std::endl;
+    //    std::cout << "running sift detector on image size: " << img_gray_q.size() << " dim: " << img_gray_q.dims << " channels: " << img_gray_q.channels() << std::endl;
     detector->detectAndCompute(img_gray_q, cv::noArray(), kps_q, mDescriptors_q);
-    featureTimer.Stop();
-//    std::cout << "Feature extraction took " << featureTimer.GetElapsedTimeAsString() << " seconds" << std::endl;
+    //    std::cout << "Feature extraction took " << featureTimer.GetElapsedTimeAsString() << " seconds" << std::endl;
     std::vector<SIFT_keypoint> keypoints;
     keypoints.resize(kps_q.size());
     for (int j = 0; j < mDescriptors_q.rows; j++)
@@ -130,12 +117,10 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
         keypoints[j].y = (img_gray_q.rows - 1.0) / 2.0f - keypoints[j].y;
     }
 
-    std::cout << " loaded " << nb_loaded_keypoints << " descriptors" << std::endl;
+//    std::cout << " extracted " << nb_loaded_keypoints << " descriptors" << std::endl;
 
     // assign the descriptors to the visual words
-    Timer timer;
-    timer.Init();
-    timer.Start();
+
     computed_visual_words.clear();
     computed_visual_words_low_dim.clear();
     if (computed_visual_words.size() < nb_loaded_keypoints)
@@ -143,23 +128,19 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
         computed_visual_words.resize(nb_loaded_keypoints);
         computed_visual_words_low_dim.resize(nb_loaded_keypoints);
     }
+//    std::cout << " prepared VW data structures " << std::endl;
     unique_vw.clear();
     vw_handler.set_nb_paths(1);
+//    std::cout << " assigning " << computed_visual_words.size() << " VW to " << mDescriptors_q.rows << " descriptors" << std::endl;
     vw_handler.assign_visual_words_ucharv(mDescriptors_q, nb_loaded_keypoints, computed_visual_words);
-    timer.Stop();
-
+//    std::cout << " done assigning " << std::endl;
     for (size_t j = 0; j < nb_loaded_keypoints; ++j)
         unique_vw.insert(computed_visual_words[j]);
 
-//    std::cout << " assigned visual words in " << timer.GetElapsedTimeAsString() << " to " << unique_vw.size() << " unique vw" << std::endl;
+//    std::cout << " assigned visual words to " << unique_vw.size() << " unique vw" << std::endl;
 
     ////
     // establish 2D-3D correspondences by using the vw to compute pairwise nearest neighbors
-    timer.Init();
-    timer.Start();
-    Timer all_timer;
-    all_timer.Init();
-    all_timer.Start();
 
     // first, compute for every feature in the image its visual word in the coarser vocabulary
     // compute the lower dimensions
@@ -198,8 +179,7 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
     uint32_t no_sn_neighbor = 0;
     uint32_t failed_ratio = 0;
 
-    // compute the priorities
-
+//    std::cout << " computing the priorities " << std::endl;
     std::list<match_struct> priorities(nb_loaded_keypoints);
     std::list<match_struct>::iterator priorities_it = priorities.begin();
 
@@ -233,7 +213,7 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
     std::map<uint32_t, std::pair<uint32_t, int>>::iterator map_it_3D;
 
     // compute nearest neighbors using 2D-to-3D and 3D-to-2D matching
-
+//    std::cout << " computing NNs using 2D-to-3D and 3D-to-2D matching " << std::endl;
     uint32_t nb_considered_points = 0;
     uint32_t nb_considered_points_counter = 0;
     for (priorities_it = priorities.begin(); priorities_it != priorities.end(); ++priorities_it)
@@ -528,143 +508,139 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
 
     ////
     // Establish the correspondences needed for RANSAC-based pose estimation
-        ////
-        // Apply the RANSAC Pre-filter
-        uint32_t max_set_size = 0;
+    ////
+    // Apply the RANSAC Pre-filter
+//    std::cout << " applying the RANSAC Pre-filter " << std::endl;
+    uint32_t max_set_size = 0;
 
-        uint32_t nb_found_corr = (uint32_t)corr_3D_to_2D.size();
+    uint32_t nb_found_corr = (uint32_t)corr_3D_to_2D.size();
 
-        // map found points to index range 0...N (actually the other direction)
-        std::vector<uint32_t> index_to_point(nb_found_corr, 0);
+    // map found points to index range 0...N (actually the other direction)
+    std::vector<uint32_t> index_to_point(nb_found_corr, 0);
 
-        // go through all points found as correspondences, establish edges in the form of images
-        std::map<uint32_t, std::list<uint32_t>> image_edges;
-        image_edges.clear();
+    // go through all points found as correspondences, establish edges in the form of images
+    std::map<uint32_t, std::list<uint32_t>> image_edges;
+    image_edges.clear();
 
-        uint32_t point_counter = 0;
+    uint32_t point_counter = 0;
 
-        std::map<uint32_t, std::list<uint32_t>>::iterator it;
+    std::map<uint32_t, std::list<uint32_t>>::iterator it;
 
-        for (map_it_3D = corr_3D_to_2D.begin(); map_it_3D != corr_3D_to_2D.end(); ++map_it_3D, ++point_counter)
+    for (map_it_3D = corr_3D_to_2D.begin(); map_it_3D != corr_3D_to_2D.end(); ++map_it_3D, ++point_counter)
+    {
+
+        index_to_point[point_counter] = map_it_3D->first;
+
+        for (std::set<uint32_t>::const_iterator it_images_point = images_per_point[map_it_3D->first].begin(); it_images_point != images_per_point[map_it_3D->first].end(); ++it_images_point)
         {
+            it = image_edges.find(*it_images_point);
 
-            index_to_point[point_counter] = map_it_3D->first;
-
-            for (std::set<uint32_t>::const_iterator it_images_point = images_per_point[map_it_3D->first].begin(); it_images_point != images_per_point[map_it_3D->first].end(); ++it_images_point)
+            if (it != image_edges.end())
+                it->second.push_back(point_counter);
+            else
             {
-                it = image_edges.find(*it_images_point);
-
-                if (it != image_edges.end())
-                    it->second.push_back(point_counter);
-                else
-                {
-                    std::list<uint32_t> new_edge(1, point_counter);
-                    std::pair<uint32_t, std::list<uint32_t>> p(*it_images_point, new_edge);
-                    image_edges.insert(p);
-                }
+                std::list<uint32_t> new_edge(1, point_counter);
+                std::pair<uint32_t, std::list<uint32_t>> p(*it_images_point, new_edge);
+                image_edges.insert(p);
             }
         }
+    }
 
-        ////
-        // now find connected components, for every point, keep track which points belong to which connected component
-        // also keep track of which images have been used
+    ////
+    // now find connected components, for every point, keep track which points belong to which connected component
+    // also keep track of which images have been used
 
-        std::vector<int> cc_per_corr(nb_found_corr, -1);
-        int current_cc = -1;
-        int max_cc = -1;
-        uint32_t size_current_cc = 0;
+    std::vector<int> cc_per_corr(nb_found_corr, -1);
+    int current_cc = -1;
+    int max_cc = -1;
+    uint32_t size_current_cc = 0;
 
-        std::set<uint32_t>::const_iterator img_it;
+    std::set<uint32_t>::const_iterator img_it;
 
-        for (point_counter = 0; point_counter < nb_found_corr; ++point_counter)
+    for (point_counter = 0; point_counter < nb_found_corr; ++point_counter)
+    {
+        if (cc_per_corr[point_counter] < 0)
         {
-            if (cc_per_corr[point_counter] < 0)
+            // start new cc
+            ++current_cc;
+            size_current_cc = 0;
+
+            std::queue<uint32_t> point_queue;
+            point_queue.push(point_counter);
+
+            // breadth first search for remaining points in connected component
+            while (!point_queue.empty())
             {
-                // start new cc
-                ++current_cc;
-                size_current_cc = 0;
+                uint32_t curr_point_id = point_queue.front();
+                point_queue.pop();
 
-                std::queue<uint32_t> point_queue;
-                point_queue.push(point_counter);
-
-                // breadth first search for remaining points in connected component
-                while (!point_queue.empty())
+                if (cc_per_corr[curr_point_id] < 0)
                 {
-                    uint32_t curr_point_id = point_queue.front();
-                    point_queue.pop();
+                    cc_per_corr[curr_point_id] = current_cc;
+                    ++size_current_cc;
 
-                    if (cc_per_corr[curr_point_id] < 0)
+                    // add all points in images visible by this point
+                    for (std::set<uint32_t>::const_iterator it_images_point = images_per_point[index_to_point[curr_point_id]].begin(); it_images_point != images_per_point[index_to_point[curr_point_id]].end(); ++it_images_point)
                     {
-                        cc_per_corr[curr_point_id] = current_cc;
-                        ++size_current_cc;
+                        it = image_edges.find(*it_images_point);
 
-                        // add all points in images visible by this point
-                        for (std::set<uint32_t>::const_iterator it_images_point = images_per_point[index_to_point[curr_point_id]].begin(); it_images_point != images_per_point[index_to_point[curr_point_id]].end(); ++it_images_point)
+                        for (std::list<uint32_t>::const_iterator p_it = it->second.begin(); p_it != it->second.end(); ++p_it)
                         {
-                            it = image_edges.find(*it_images_point);
-
-                            for (std::list<uint32_t>::const_iterator p_it = it->second.begin(); p_it != it->second.end(); ++p_it)
-                            {
-                                if (cc_per_corr[*p_it] < 0)
-                                    point_queue.push(*p_it);
-                            }
-
-                            // clear the image, we do not the this multi-edge anymore
-                            it->second.clear();
+                            if (cc_per_corr[*p_it] < 0)
+                                point_queue.push(*p_it);
                         }
+
+                        // clear the image, we do not the this multi-edge anymore
+                        it->second.clear();
                     }
                 }
-
-                if (size_current_cc > max_set_size)
-                {
-                    max_set_size = size_current_cc;
-                    max_cc = current_cc;
-                }
             }
-        }
 
-        ////
-        // now generate the correspondences
-
-        c2D.reserve(2 * max_set_size);
-        c3D.reserve(3 * max_set_size);
-
-        point_counter = 0;
-        for (map_it_3D = corr_3D_to_2D.begin(); map_it_3D != corr_3D_to_2D.end(); ++map_it_3D, ++point_counter)
-        {
-            if (cc_per_corr[point_counter] == max_cc)
+            if (size_current_cc > max_set_size)
             {
-                c2D.push_back(keypoints[map_it_3D->second.first].x);
-                c2D.push_back(keypoints[map_it_3D->second.first].y);
-
-                c3D.push_back(points3D[map_it_3D->first][0]);
-                c3D.push_back(points3D[map_it_3D->first][1]);
-                c3D.push_back(points3D[map_it_3D->first][2]);
-
-                final_correspondences.push_back(std::make_pair(map_it_3D->second.first, map_it_3D->first));
+                max_set_size = size_current_cc;
+                max_cc = current_cc;
             }
         }
+    }
 
+    ////
+    // now generate the correspondences
 
+    c2D.reserve(2 * max_set_size);
+    c3D.reserve(3 * max_set_size);
 
-    timer.Stop();
- //   std::cout << " computed correspondences in " << timer.GetElapsedTimeAsString() << ", considering " << nb_considered_points << " features "
- //             << " ( " << double(nb_considered_points) / double(nb_loaded_keypoints) * 100.0 << " % ) " << std::endl;
+    point_counter = 0;
+    for (map_it_3D = corr_3D_to_2D.begin(); map_it_3D != corr_3D_to_2D.end(); ++map_it_3D, ++point_counter)
+    {
+        if (cc_per_corr[point_counter] == max_cc)
+        {
+            c2D.push_back(keypoints[map_it_3D->second.first].x);
+            c2D.push_back(keypoints[map_it_3D->second.first].y);
+
+            c3D.push_back(points3D[map_it_3D->first][0]);
+            c3D.push_back(points3D[map_it_3D->first][1]);
+            c3D.push_back(points3D[map_it_3D->first][2]);
+
+            final_correspondences.push_back(std::make_pair(map_it_3D->second.first, map_it_3D->first));
+        }
+    }
+
+    //   std::cout << " computed correspondences in " << timer.GetElapsedTimeAsString() << ", considering " << nb_considered_points << " features "
+    //             << " ( " << double(nb_considered_points) / double(nb_loaded_keypoints) * 100.0 << " % ) " << std::endl;
 
     ////
     // do the pose verification using RANSAC
 
- //   RANSAC::computation_type = P6pt;
-//    RANSAC::stop_after_n_secs = true;
- //   RANSAC::max_time = ransac_max_time;
- //   RANSAC::error = 10.0f; // for P6pt this is the SQUARED reprojection error in pixels
-//    RANSAC ransac_solver;
+    //   RANSAC::computation_type = P6pt;
+    //    RANSAC::stop_after_n_secs = true;
+    //   RANSAC::max_time = ransac_max_time;
+    //   RANSAC::error = 10.0f; // for P6pt this is the SQUARED reprojection error in pixels
+    //    RANSAC ransac_solver;
 
     uint32_t nb_corr = c2D.size() / 2;
 
-    std::cout << " applying RANSAC on " << nb_corr << " correspondences out of " << corr_3D_to_2D.size() << std::endl;
-    timer.Init();
-    timer.Start();
+//    std::cout << " applying RANSAC on " << nb_corr << " correspondences out of " << corr_3D_to_2D.size() << std::endl;
     cv::Mat rvec = cv::Mat::zeros(1, 3, CV_64F);
     cv::Mat tvec = cv::Mat::zeros(1, 3, CV_64F);
     std::vector<cv::Point3d> corr3d(nb_corr);
@@ -709,9 +685,7 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
             out = sceneTransform.inv();
         }
     }
-    timer.Stop();
-    all_timer.Stop();
-    std::cout << "#########################" << std::endl;
+//    std::cout << "#########################" << std::endl;
     return out;
 }
 
@@ -761,7 +735,7 @@ void ACSLocalizer::cleanUp()
     images_per_point.clear();
 }
 
-int ACSLocalizer::init(std::string keylist, std::string bundle_file, uint32_t nb_clusters, std::string cluster_file, std::string vw_assignments, int prioritization_strategy, uint32_t _N_3D, int _consider_K_nearest_cams)
+int ACSLocalizer::init(std::string bundle_file, uint32_t nb_clusters, std::string cluster_file, std::string vw_assignments, int prioritization_strategy, uint32_t _N_3D, int _consider_K_nearest_cams)
 {
 
     computed_visual_words.resize(50000);
@@ -776,8 +750,6 @@ int ACSLocalizer::init(std::string keylist, std::string bundle_file, uint32_t nb
 
     for (int i = 0; i < 1000; ++i)
         features_per_vw[i].resize(100);
-
-
 
     // rocketcluster
     if (prioritization_strategy != 0 && prioritization_strategy != 1 && prioritization_strategy != 2)
@@ -1375,4 +1347,4 @@ int ACSLocalizer::init(std::string keylist, std::string bundle_file, uint32_t nb
 
     std::cout << "  done " << std::endl;
 };
-}
+} // namespace pca

@@ -79,7 +79,7 @@ int main(int argc, char **argv)
     // bundle_file = '/home/mikhail/Documents/RTAB-Map/bundler/voest_4300/cameras.out' 
     // cluster_file = /home/mikhail/workspace/ACG-localizer/markt_paris_gpu_sift_100k.cluster 
     // vw_assignments = '/home/mikhail/Documents/RTAB-Map/bundler/voest_4300/bundle.desc_assignments.integer_mean.voctree.clusters.100k.bin'
-    loc.init(keylist, bundle_file, 100000, cluster_file, vw_assignments, 0, 500, 10);
+    loc.init(bundle_file, 100000, cluster_file, vw_assignments, 0, 500, 10);
 
 //    PointCloudMapping pcm(100);
  //   pcm.AddPointCloud(points3D, colors_3D, 1.0);

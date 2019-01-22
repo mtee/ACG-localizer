@@ -39,7 +39,7 @@ set_target_properties(flann_cpp-gd PROPERTIES
     DEFINE_SYMBOL FLANN_EXPORTS
 )
 
-add_library(flann_cpp_s-gd STATIC ${CPP_SOURCES})
+add_library(flann_cpp_s-gd SHARED ${CPP_SOURCES})
 set_target_properties(flann_cpp_s-gd PROPERTIES COMPILE_FLAGS ${CMAKE_CXX_FLAGS_DEBUG})
 set_property(TARGET flann_cpp_s-gd PROPERTY COMPILE_DEFINITIONS FLANN_STATIC)
 

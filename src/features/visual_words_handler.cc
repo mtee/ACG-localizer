@@ -525,6 +525,7 @@ void visual_words_handler::get_parents_at_level_L( int L, int* &ids )
     
 bool visual_words_handler::assign_visual_words_uchar( std::vector< unsigned char > &descriptors, uint32_t nb_descriptors, std::vector< uint32_t > &assignments )
 {
+// FLANN
   if( assignments.size() < (size_t) nb_descriptors )
     assignments.resize(nb_descriptors);
     
@@ -569,8 +570,7 @@ bool visual_words_handler::assign_visual_words_uchar( std::vector< unsigned char
   }
   else if( mMethod == 2 )
   {
-    // FLANN
-//     std::cout << " FLANN : " << nb_descriptors << " paths : " << mNbPath << " index type : " << mFlannIndexType << std::endl;
+    
     if( mFlannIndex == 0 )
       return false;
     // copy the descriptors
@@ -654,7 +654,6 @@ bool visual_words_handler::assign_visual_words_ucharv( cv::Mat descriptors, uint
 	}
 	index2 += 128;
       }
-//       std::cout << " Linear: " << i << " -> " << assignments[i] << " dist :  " << max_dist << std::endl;
     }
     
     return true;
@@ -673,17 +672,16 @@ bool visual_words_handler::assign_visual_words_ucharv( cv::Mat descriptors, uint
 		mFlannFeatures[i][j] = (float) descriptors.at<float>(i, j);
       }
     }
-    
     // compute the assignments
     if( mFlannIndexType == 0 )
     {
-      flann::SearchParams params( FLANN_CHECKS_AUTOTUNED );
-      mFlannIndex->knnSearch( mFlannFeatures, mFlannAssignments, mFlannDistances, 1, params );
+        flann::SearchParams params( FLANN_CHECKS_AUTOTUNED );
+        mFlannIndex->knnSearch( mFlannFeatures, mFlannAssignments, mFlannDistances, 1, params );
     }
     else
     {
-      flann::SearchParams params( mNbPath );
-      mFlannIndex->knnSearch( mFlannFeatures, mFlannAssignments, mFlannDistances, 1, params );
+        flann::SearchParams params( mNbPath );
+        mFlannIndex->knnSearch( mFlannFeatures, mFlannAssignments, mFlannDistances, 1, params );
     }
     // copy the assignments
     for( uint32_t i=0; i<nb_descriptors; ++i )
@@ -741,7 +739,6 @@ bool visual_words_handler::assign_visual_words_ucharv( std::vector< unsigned cha
 	}
 	index2 += 128;
       }
-//       std::cout << " Linear: " << i << " -> " << assignments[i] << " dist :  " << max_dist << std::endl;
     }
     
     return true;
@@ -1015,7 +1012,6 @@ bool visual_words_handler::assign_visual_words_uchar( std::vector< unsigned char
   else if( mMethod == 2 )
   {
     // FLANN
-//     std::cout << " FLANN : " << nb_descriptors << " paths : " << mNbPath << " index type : " << mFlannIndexType << std::endl;
     if( mFlannIndex == 0 )
       return false;
     // copy the descriptors
@@ -1028,7 +1024,6 @@ bool visual_words_handler::assign_visual_words_uchar( std::vector< unsigned char
 		mFlannFeatures[i][j] = (float) descriptors[index+j];
       }
       index += 128;
-//       std::cout << std::endl;
     }
     
     // compute the assignments

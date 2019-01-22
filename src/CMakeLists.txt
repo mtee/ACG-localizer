@@ -19,8 +19,11 @@ add_custom_target(headers SOURCES ${LibFiles})
 
 #find_package (FLANN)
 set(FLANN_INCLUDE_DIR /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/src/cpp)
+#set(FLANN_LIBRARY /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib/libflann_cpp.so)
 set(FLANN_LIBRARY /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib/libflann_cpp_s.a)
+#set(FLANN_LIBRARY /home/mikhail/workspace/ACG-localizer/flann-1.8.4-src/build/lib/libflann_cpp_s.a)
 
+set(FLANN_LIBRARY_DIR /home/mikhail/workspace/ACG-localizer/flann-1.6.11-src/build/lib)
 # find_package(CUDA)
 # if (NOT CUDA_FOUND)
 #     message(STATUS "CUDA not found. Project will not be built.")
@@ -104,7 +107,7 @@ link_directories (
   ${LAPACK_LIBRARY_DIR}
   ${OPENMESH_LIBRARY_DIR}
   ${ANN_LIBRARY_DIR}
-  ${FLANN_LIBRARY_DIR}
+ # ${FLANN_LIBRARY_DIR}
   ${OpenCV_LIBS}
 )
 
@@ -137,8 +140,6 @@ add_executable (compute_desc_assignments
 
 add_library(acs_localizer SHARED
     acs_localizer.cc
-    timer.cc
-    timer.hh
     ${features_SRC}
  #   ${features_HDR}
     ${math_SRC}

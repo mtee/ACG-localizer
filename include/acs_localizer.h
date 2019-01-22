@@ -197,7 +197,7 @@ class ACSLocalizer
 
     ACSLocalizer();
     cv::Mat processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Mat &inliers, std::vector<float> &c2D, std::vector<float> &c3D, cv::Mat &mDescriptors_q, std::set<size_t> &unique_vw);
-    int init(std::string keylist, std::string bundle_file, uint32_t nb_clusters, std::string cluster_file, std::string vw_assignments, int prioritization_strategy, uint32_t _N_3D, int _consider_K_nearest_cams);
+    int init(std::string bundle_file, uint32_t nb_clusters, std::string cluster_file, std::string vw_assignments, int prioritization_strategy, uint32_t _N_3D, int _consider_K_nearest_cams);
     void cleanUp();
 
 
