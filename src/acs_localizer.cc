@@ -86,7 +86,7 @@ ACSLocalizer::ACSLocalizer()
 
 cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Mat &inliers, std::vector<float> &c2D, std::vector<float> &c3D, cv::Mat &mDescriptors_q, std::set<size_t> &unique_vw)
 {
-    cv::Mat out = cv::Mat::zeros(4, 4, CV_64F);
+    cv::Mat out; // = cv::Mat::zeros(4, 4, CV_64F);
 
     cv::Ptr<cv::xfeatures2d::SiftFeatureDetector> detector = cv::xfeatures2d::SiftFeatureDetector::create();
 

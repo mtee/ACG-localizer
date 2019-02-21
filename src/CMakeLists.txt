@@ -108,7 +108,7 @@ link_directories (
   ${OPENMESH_LIBRARY_DIR}
   ${ANN_LIBRARY_DIR}
  # ${FLANN_LIBRARY_DIR}
-  ${OpenCV_LIBS}
+ # ${OpenCV_LIBS}
 )
 
 
@@ -158,7 +158,7 @@ target_link_libraries (acs_localizer
     ${FLANN_LIBRARY}
     ${ANN_LIBRARIES}
 )
-
+#
 # set libraries to link against
 target_link_libraries (Bundle2Info
     ${GMM_LIBRARY}
