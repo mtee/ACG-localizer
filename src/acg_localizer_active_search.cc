@@ -174,7 +174,7 @@ int main(int argc, char **argv)
         //    std::vector< unsigned char* >& descriptors = key_loader.get_descriptors();
         //    std::vector< SIFT_keypoint >& keypoints = key_loader.get_keypoints();
         std::cout << "loading query image: " << jpg_filename << std::endl;
-        cv::Mat img_rgb_q_raw = cv::imread(jpg_filename, CV_LOAD_IMAGE_ANYCOLOR);
+        cv::Mat img_rgb_q_raw = cv::imread(jpg_filename, cv::IMREAD_ANYCOLOR);
         cv::Mat img_q_rgb;
         cv::undistort(img_rgb_q_raw, img_q_rgb, camMatrix_raw, distCoeffs);
 

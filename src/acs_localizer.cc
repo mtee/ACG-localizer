@@ -29,7 +29,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/calib3d.hpp>
-#include <opencv2/xfeatures2d.hpp>
+#include <opencv2/features2d.hpp>
 
 // includes for classes dealing with SIFT-features
 #include "SIFT_loader.hh"
@@ -88,11 +88,10 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
 {
     cv::Mat out; // = cv::Mat::zeros(4, 4, CV_64F);
 
-    cv::Ptr<cv::xfeatures2d::SiftFeatureDetector> detector = cv::xfeatures2d::SiftFeatureDetector::create();
+    cv::Ptr<cv::SiftFeatureDetector> detector = cv::SiftFeatureDetector::create();
 
     std::vector<cv::KeyPoint> kps_q;
 
-    //    std::cout << "running sift detector on image size: " << img_gray_q.size() << " dim: " << img_gray_q.dims << " channels: " << img_gray_q.channels() << std::endl;
     detector->detectAndCompute(img_gray_q, cv::noArray(), kps_q, mDescriptors_q);
     //    std::cout << "Feature extraction took " << featureTimer.GetElapsedTimeAsString() << " seconds" << std::endl;
     std::vector<SIFT_keypoint> keypoints;
@@ -117,8 +116,6 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
         keypoints[j].y = (img_gray_q.rows - 1.0) / 2.0f - keypoints[j].y;
     }
 
-//    std::cout << " extracted " << nb_loaded_keypoints << " descriptors" << std::endl;
-
     // assign the descriptors to the visual words
 
     computed_visual_words.clear();
@@ -128,17 +125,11 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
         computed_visual_words.resize(nb_loaded_keypoints);
         computed_visual_words_low_dim.resize(nb_loaded_keypoints);
     }
-//    std::cout << " prepared VW data structures " << std::endl;
     unique_vw.clear();
     vw_handler.set_nb_paths(1);
-//    std::cout << " assigning " << computed_visual_words.size() << " VW to " << mDescriptors_q.rows << " descriptors" << std::endl;
     vw_handler.assign_visual_words_ucharv(mDescriptors_q, nb_loaded_keypoints, computed_visual_words);
-//    std::cout << " done assigning " << std::endl;
     for (size_t j = 0; j < nb_loaded_keypoints; ++j)
         unique_vw.insert(computed_visual_words[j]);
-
-//    std::cout << " assigned visual words to " << unique_vw.size() << " unique vw" << std::endl;
-
     ////
     // establish 2D-3D correspondences by using the vw to compute pairwise nearest neighbors
 
@@ -179,7 +170,6 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
     uint32_t no_sn_neighbor = 0;
     uint32_t failed_ratio = 0;
 
-//    std::cout << " computing the priorities " << std::endl;
     std::list<match_struct> priorities(nb_loaded_keypoints);
     std::list<match_struct>::iterator priorities_it = priorities.begin();
 
@@ -213,12 +203,10 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
     std::map<uint32_t, std::pair<uint32_t, int>>::iterator map_it_3D;
 
     // compute nearest neighbors using 2D-to-3D and 3D-to-2D matching
-//    std::cout << " computing NNs using 2D-to-3D and 3D-to-2D matching " << std::endl;
     uint32_t nb_considered_points = 0;
     uint32_t nb_considered_points_counter = 0;
     for (priorities_it = priorities.begin(); priorities_it != priorities.end(); ++priorities_it)
     {
-        //         std::cout << priorities_it->feature_id << " " << priorities_it->matching_type << " " << priorities_it->matching_cost << std::endl;
         // check the matching type, and handle the different matching directions accordingly
         if (priorities_it->matching_type)
         {
@@ -493,9 +481,6 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
                 }
             }
         }
-
-        //         std::cout << " "  << corr_3D_to_2D.size() << std::endl;
-
         if (corr_3D_to_2D.size() >= max_cor_early_term)
         {
             nb_considered_points = nb_considered_points_counter;
@@ -510,7 +495,6 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
     // Establish the correspondences needed for RANSAC-based pose estimation
     ////
     // Apply the RANSAC Pre-filter
-//    std::cout << " applying the RANSAC Pre-filter " << std::endl;
     uint32_t max_set_size = 0;
 
     uint32_t nb_found_corr = (uint32_t)corr_3D_to_2D.size();
@@ -626,8 +610,8 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
         }
     }
 
-    //   std::cout << " computed correspondences in " << timer.GetElapsedTimeAsString() << ", considering " << nb_considered_points << " features "
-    //             << " ( " << double(nb_considered_points) / double(nb_loaded_keypoints) * 100.0 << " % ) " << std::endl;
+  //     std::cout << " computed correspondences, considering " << nb_considered_points << " features "
+   //              << " ( " << double(nb_considered_points) / double(nb_loaded_keypoints) * 100.0 << " % ) " << std::endl;
 
     ////
     // do the pose verification using RANSAC
@@ -657,12 +641,8 @@ cv::Mat ACSLocalizer::processImage(cv::Mat img_gray_q, cv::Mat camMatrix, cv::Ma
     int inlierCount = 0;
     if (corr2d.size() > 4)
     {
-        cv::solvePnPRansac(corr3d, corr2d, camMatrix, cv::Mat(), rvec, tvec, false, 500, 8.0F, 0.99, inliers, CV_EPNP);
+        cv::solvePnPRansac(corr3d, corr2d, camMatrix, cv::Mat(), rvec, tvec, false, 500, 8.0F, 0.99, inliers, cv::SOLVEPNP_EPNP);
         inlierCount = inliers.size().height;
-        // std::cout << "opencv ransac pnp. Translation " << std::endl
-        //           << tvec << std::endl
-        //           << "inlier count: " << inlierCount << std::endl;
-
         if (inlierCount > 10)
         {
 
