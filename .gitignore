@@ -2,3 +2,5 @@
 build/
 .vscode/
 bin/
+generic_vocabulary_100k.zip
+lib/
